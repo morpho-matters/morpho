@@ -26,7 +26,7 @@ You should be able to obtain these with the following pip commands:
 
 Once downloaded, running the script launch_morpho.py should start up Morpho in its out-of-the-box state: you should see the introductory animation play, followed by the main window.
 
--=How to Export as a Standalone=-
+-=How to Export as an Executable=-
 
 As it currently stands, the export process is a little messy. This is largely because there actually need to be two independent executables as part of the export, since the animation player is separate from the GUI.
 
