@@ -70,6 +70,8 @@ whitelist = {
 "det",
 
 "sum",
+"prod",
+"product",
 "range",
 "seq",
 "inf",
