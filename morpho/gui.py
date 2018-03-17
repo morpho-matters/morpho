@@ -676,9 +676,14 @@ class RootWindow(object):
         domFrame.id = 0
         domFrame.optimizePaths()
 
+        # Create polar grid from square, centered domain grid
+        polargrid = lambda s: Re(s)*exp(Im(s)/imagMax*pi/2*i)
+
         # Now let's create all the other frames!
         # Construct the (visible) descendents of a parent mframe
         def constructDescendents(parent, ID):
+            nonlocal polargrid
+
             # Get child list of framedata structures
             children = []
             for frm in self.frames:
@@ -691,7 +696,7 @@ class RootWindow(object):
                 expr = child.function
                 expr = expr.replace("^", "**")  # Pythonize carets
 
-                func = eval("lambda s: complex(" + expr + ")")
+                func = eval("lambda s, polargrid=polargrid: complex(" + expr + ")")
 
                 # Apply the function to the parent frame
                 try:
