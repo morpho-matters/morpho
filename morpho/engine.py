@@ -1030,7 +1030,7 @@ def standardGrid(
         vDimColor = tuple(c/2 for c in vcolor)
         # BG horizontal lines
         for n in range(nhorz):
-            y = ymin + n*(ymax-ymin)/(nhorz-1)
+            y = ymin + n*(ymax-ymin)/(nhorz-1) if nhorz != 1 else (ymin+ymax)/2
             Line = Path([xmin+y*1j, xmax+y*1j])
             Line.color = hDimColor
             Line.width = 1
@@ -1039,7 +1039,7 @@ def standardGrid(
 
         # BG vertical lines
         for n in range(nvert):
-            x = xmin + n*(xmax-xmin)/(nvert-1)
+            x = xmin + n*(xmax-xmin)/(nvert-1) if nvert != 1 else (xmin+xmax)/2
             Line = Path([x+ymin*1j, x+ymax*1j])
             Line.color = vDimColor
             Line.width = 1
@@ -1048,7 +1048,7 @@ def standardGrid(
 
     # Horizontal lines
     for n in range(nhorz):
-        y = ymin + n*(ymax-ymin)/(nhorz-1)
+        y = ymin + n*(ymax-ymin)/(nhorz-1) if nhorz != 1 else (ymin+ymax)/2
         Line = line(xmin+y*1j, xmax+y*1j, steps=50*hres)
         Line.color = hcolor
         Line.width = hwidth
@@ -1065,7 +1065,7 @@ def standardGrid(
 
     # Vertical lines
     for n in range(nvert):
-        x = xmin + n*(xmax-xmin)/(nvert-1)
+        x = xmin + n*(xmax-xmin)/(nvert-1) if nvert != 1 else (xmin+xmax)/2
         Line = line(x+ymin*1j, x+ymax*1j, steps=50*vres)
         Line.color = vcolor
         Line.width = vwidth
