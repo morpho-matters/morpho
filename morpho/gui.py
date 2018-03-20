@@ -25,13 +25,13 @@ import morpho.engine as eng
 import morpho.whitelist as wh
 
 # Current Morpho version
-version = 1.0
+version = 1.01
 
 # fileVersion should only be changed when animations saved with
 # an updated version of Morpho can't be played by older versions.
 # This is done since some updates won't affect whether or not
 # an animation file can be played (e.g. efficiency improvements)
-fileVersion = 1.0
+fileVersion = 1.01
 
 # Loading directly into namespace gives users access to
 # complex sin, cos, etc. when applying functions
