@@ -1,0 +1,49 @@
+Morpho animation file
+
+1.0
+
+prerender : True
+realMax : 5.0
+frameRate : 60.0
+transition : 0
+imagMax : 5.0
+imagMin : -5.0
+window_width : 600
+tweenMethod : direct
+window_height : 600
+realMin : -5.0
+
+BGgrid : True
+horzMidlines : True
+hide : False
+id : 0
+type : domain
+delay : 0.0
+nvert : 11
+grid : Standard
+vertRes : 0.05
+name : Domain
+nhorz : 11
+BG : (0.0, 0.0, 0.0)
+vertMidlines : True
+tweenDuration : 3.0
+horzRes : 0.05
+axes : True
+
+delay : 2.0
+base : 0
+name : Transform
+hide : False
+tweenDuration : 3.0
+id : 1
+type : range
+function : mat(2,-1,2,0)*s
+
+delay : 2.0
+base : 1
+name : Inverse applied
+hide : False
+tweenDuration : 3.0
+id : 2
+type : range
+function : mat(2,-1,2,0)^-1*s

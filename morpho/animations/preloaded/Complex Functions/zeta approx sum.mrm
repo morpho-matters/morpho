@@ -1,0 +1,85 @@
+Morpho animation file
+
+1.0
+
+tweenMethod : direct
+window_width : 1000
+prerender : False
+transition : 0
+frameRate : 30.0
+realMin : -7.0
+imagMin : -4.0
+window_height : 571
+realMax : 7.0
+imagMax : 4.0
+
+name : Domain
+delay : 0.0
+horzRes : 1.0
+type : domain
+tweenDuration : 3.0
+id : 0
+nvert : 11
+grid : Zeta
+BGgrid : True
+axes : True
+vertMidlines : True
+vertRes : 1.0
+BG : (0.0, 0.0, 0.0)
+horzMidlines : True
+nhorz : 11
+hide : True
+
+name : Clipped Domain
+base : 0
+delay : 0.0
+function : s if real(s)>1 else nan
+type : range
+tweenDuration : 3.0
+id : 1
+hide : False
+
+name : 3 terms
+base : 1
+delay : 2.0
+function : 1 + 1/2^s + 1/3^s
+type : range
+tweenDuration : 3.0
+id : 3
+hide : False
+
+name : 10 terms
+base : 1
+delay : 2.0
+function : sum(1/n^s for n in seq(1,10))
+type : range
+tweenDuration : 3.0
+id : 5
+hide : False
+
+name : 100 terms
+base : 1
+delay : 2.0
+function : sum(1/n^s for n in seq(1,100))
+type : range
+tweenDuration : 3.0
+id : 6
+hide : False
+
+name : 1000 terms
+base : 1
+delay : 2.0
+function : sum(1/n^s for n in seq(1,1000))
+type : range
+tweenDuration : 3.0
+id : 7
+hide : False
+
+name : Zeta
+base : 1
+delay : 2.0
+function : zeta(s)
+type : range
+tweenDuration : 3.0
+id : 4
+hide : False

@@ -1,0 +1,85 @@
+Morpho animation file
+
+1.0
+
+window_height : 571
+tweenMethod : direct
+frameRate : 30.0
+prerender : False
+imagMin : -4.0
+imagMax : 4.0
+realMax : 7.0
+transition : 0
+window_width : 1000
+realMin : -7.0
+
+delay : 0.0
+grid : Zeta
+horzRes : 1.0
+vertRes : 1.0
+horzMidlines : True
+id : 0
+nhorz : 11
+tweenDuration : 3.0
+axes : True
+BG : (0.0, 0.0, 0.0)
+name : Domain
+type : domain
+hide : True
+BGgrid : True
+vertMidlines : True
+nvert : 11
+
+base : 0
+delay : 0.0
+name : Clipped Domain
+type : range
+tweenDuration : 3.0
+hide : False
+id : 1
+function : s if real(s)>1 else nan
+
+base : 1
+delay : 1.0
+name : 3 primes
+type : range
+tweenDuration : 2.0
+hide : False
+id : 6
+function : prod(1/(1-p^-s) for p in [2, 3, 5])
+
+base : 1
+delay : 1.0
+name : 10 primes
+type : range
+tweenDuration : 2.0
+hide : False
+id : 5
+function : prod(1/(1-p^-s) for p in [2, 3, 5, 7, 11, 13, 17, 19, 23, 29])
+
+base : 1
+delay : 1.0
+name : 20 primes
+type : range
+tweenDuration : 2.0
+hide : False
+id : 7
+function : prod(1/(1-p^-s) for p in [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71])
+
+base : 1
+delay : 1.0
+name : 58 primes
+type : range
+tweenDuration : 2.0
+hide : False
+id : 8
+function : prod(1/(1-p^-s) for p in [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271])
+
+base : 1
+delay : 1.0
+name : Zeta
+type : range
+tweenDuration : 2.0
+hide : False
+id : 4
+function : zeta(s)
