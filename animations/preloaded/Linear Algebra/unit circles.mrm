@@ -1,0 +1,94 @@
+Morpho animation file
+
+1.0
+
+imagMax : 1.5
+window_height : 600
+realMax : 1.5
+imagMin : -1.5
+frameRate : 30.0
+transition : 0
+prerender : False
+tweenMethod : direct
+realMin : -1.5
+window_width : 600
+
+name : Domain
+delay : 0.0
+axes : True
+horzMidlines : False
+id : 0
+nhorz : 2
+grid : Standard
+vertMidlines : False
+vertRes : 1.0
+nvert : 2
+hide : True
+horzRes : 1.0
+BG : (0.0, 0.0, 0.0)
+BGgrid : False
+type : domain
+tweenDuration : 3.0
+
+name : Zero
+function : 0
+tweenDuration : 0.0
+delay : 0.0
+hide : False
+base : 0
+id : 3
+type : range
+
+name : L1 Unit Circle
+function : s/norm(s,1)
+tweenDuration : 1.5
+delay : 1.5
+hide : False
+base : 0
+id : 1
+type : range
+
+name : L2 Unit Circle
+function : s/norm(s,2)
+tweenDuration : 1.5
+delay : 1.5
+hide : False
+base : 0
+id : 2
+type : range
+
+name : L3 Unit Circle
+function : s/norm(s,3)
+tweenDuration : 1.5
+delay : 1.5
+hide : False
+base : 0
+id : 4
+type : range
+
+name : L-infinity Unit Circle
+function : s/norm(s,inf)
+tweenDuration : 1.5
+delay : 1.5
+hide : False
+base : 0
+id : 6
+type : range
+
+name : L-2/3 Unit Circle (Astroid)
+function : s/norm(s,2/3)
+tweenDuration : 1.5
+delay : 1.5
+hide : False
+base : 0
+id : 9
+type : range
+
+name : L-1/3 Unit Circle
+function : s/norm(s,1/3)
+tweenDuration : 1.5
+delay : 1.5
+hide : False
+base : 0
+id : 8
+type : range

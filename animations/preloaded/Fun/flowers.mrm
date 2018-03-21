@@ -1,0 +1,58 @@
+Morpho animation file
+
+1.0
+
+imagMax : 5.0
+imagMin : -5.0
+window_width : 600
+realMax : 5.0
+frameRate : 30.0
+prerender : False
+tweenMethod : direct
+window_height : 600
+realMin : -5.0
+transition : 0
+
+vertRes : 1.0
+horzMidlines : True
+vertMidlines : True
+type : domain
+tweenDuration : 3.0
+name : Domain
+id : 0
+grid : Standard
+BGgrid : False
+axes : False
+nhorz : 11
+hide : True
+nvert : 11
+horzRes : 1.0
+delay : 0.0
+BG : (0.0, 0.0, 0.0)
+
+tweenDuration : 3.0
+delay : 1.0
+type : range
+name : Disk
+hide : False
+base : 0
+function : disk(s)
+id : 1
+
+tweenDuration : 3.0
+delay : 2.0
+type : range
+name : Clover
+hide : False
+base : 1
+function : abs(s)*sin(2*arg(s))*exp(arg(s)*i)
+id : 2
+
+tweenDuration : 3.0
+delay : 2.0
+type : range
+name : Sunflower
+hide : False
+base : 1
+function : abs(s)*sin(4*arg(s))*exp(arg(s)*i)
+id : 3

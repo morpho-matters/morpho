@@ -1,0 +1,38 @@
+Morpho animation file
+
+1.0
+
+frameRate : 60.0
+realMax : 5.0
+window_height : 600
+imagMin : -5.0
+prerender : True
+imagMax : 5.0
+realMin : -5.0
+transition : 0
+window_width : 600
+tweenMethod : direct
+
+horzRes : 3.5
+tweenDuration : 3.0
+id : 0
+axes : True
+BGgrid : True
+nhorz : 11
+vertMidlines : True
+name : Domain
+grid : Standard
+nvert : 11
+delay : 0.0
+horzMidlines : True
+vertRes : 3.5
+type : domain
+BG : (0, 0, 0)
+
+tweenDuration : 3.0
+id : 3
+delay : 2.0
+type : range
+function : tan(s)
+base : 0
+name : tan(s)
