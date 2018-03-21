@@ -1,0 +1,58 @@
+Morpho animation file
+
+1.0
+
+imagMin : -5.0
+realMin : -5.0
+tweenMethod : direct
+imagMax : 5.0
+realMax : 5.0
+prerender : False
+frameRate : 30.0
+transition : 0
+window_height : 600
+window_width : 600
+
+nhorz : 11
+hide : True
+BG : (0.0, 0.0, 0.0)
+vertMidlines : True
+axes : False
+vertRes : 1.0
+delay : 0.0
+BGgrid : False
+name : Domain
+nvert : 11
+grid : Standard
+tweenDuration : 3.0
+horzMidlines : True
+id : 0
+type : domain
+horzRes : 1.0
+
+function : 0.9*disk(s) if not(pi/2 < arg(s) < pi) else nan
+name : Clipped Disk
+id : 1
+base : 0
+tweenDuration : 3.0
+hide : True
+delay : 0.0
+type : range
+
+function : 5*0.9*s/abs(s)
+name : Outer Rim
+id : 3
+base : 1
+tweenDuration : 3.0
+hide : False
+delay : 0.0
+type : range
+
+function : s + 0.4*abs(s - 5*s/abs(s)) * s/abs(s)
+name : Eye
+id : 2
+base : 1
+tweenDuration : 3.0
+hide : False
+delay : 2.0
+type : range

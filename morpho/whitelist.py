@@ -70,8 +70,6 @@ whitelist = {
 "det",
 
 "sum",
-"prod",
-"product",
 "range",
 "seq",
 "inf",
@@ -88,7 +86,6 @@ whitelist = {
 "max",
 
 "disk",
-"polargrid",
 
 "+", "-", "*", "/", "%", "^",
 "=", "!", "<", ">",

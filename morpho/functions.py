@@ -88,13 +88,3 @@ Disk = disk
 # Inclusive range() function
 def seq(start, end, step=1):
     return range(start, end+1, step)
-
-# Computes the product of an iterable
-# similar to how sum() computes the sum.
-def prod(a):
-    p = 1
-    for n in a:
-        p *= n
-    return p
-
-product = prod

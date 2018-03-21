@@ -1,0 +1,49 @@
+Morpho animation file
+
+1.0
+
+realMax : 5.0
+transition : 0
+imagMin : -5.0
+tweenMethod : direct
+prerender : False
+imagMax : 5.0
+frameRate : 30.0
+realMin : -5.0
+window_height : 600
+window_width : 600
+
+BGgrid : True
+tweenDuration : 3.0
+nvert : 11
+horzRes : 1.0
+BG : (0.0, 0.0, 0.0)
+grid : Standard
+type : domain
+vertRes : 1.0
+name : Domain
+delay : 0.0
+id : 0
+nhorz : 11
+hide : False
+vertMidlines : True
+axes : True
+horzMidlines : True
+
+name : L1 norm space
+delay : 2.0
+id : 1
+function : norm(s,1)/norm(s,2) * s
+hide : False
+base : 0
+tweenDuration : 3.0
+type : range
+
+name : L-infinity norm space
+delay : 2.0
+id : 2
+function : norm(s,inf)/norm(s,2) * s
+hide : False
+base : 0
+tweenDuration : 3.0
+type : range

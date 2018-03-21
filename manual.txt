@@ -1,0 +1,434 @@
+Morpho - Transformation Animator
+Version 1.0.0
+
+Contact: morpho.matters <at> gmail
+
+-=About=-
+
+At its most basic, Morpho is a program that lets you "graph" complex-valued 
+functions as an animated "transformation" where the points in the input grid 
+"move over" to their corresponding output points. Although this was the 
+original idea, Morpho has grown to handle linear transformations (i.e. matrix 
+multiplication) as well as more exotic animations.
+
+At this point, I mainly regard Morpho as an educational tool to help visualize 
+otherwise hard to visualize math functions, but I like to think it has wider 
+applications and could be of some use to professionals who may need a 
+quick way to visualize a complicated transformation in the plane.
+
+Morpho was inspired by Grant Sanderson's brilliant Youtube channel 
+3Blue1Brown, particularly his video on the Riemann Zeta function and his 
+excellent Essence of Linear Algebra series.
+
+-=System Requirements=-
+
+This version of Morpho is designed to run on Windows. I don't have a precise 
+handle on the system requirements, but I've tested it successfully on 
+Windows XP, 7, and 10.
+
+-=Quick Start=-
+
+I tried to design Morpho to be as easy to use as possible, and I hope the 
+interface is pretty self-explanatory. Nevertheless, this is a quick introduction 
+to the essentials to quickly get an animation up and running.
+
+To start Morpho, double-click "Morpho.exe" within the Morpho folder. If this 
+is the first time you've ever started it, an introductory animation will play. 
+When you close it, you'll be presented with the main window.
+
+At the bottom of the main window is a list of frames. When you first start 
+Morpho, this will have only one frame: the "Domain" frame, which is just the 
+initial grid. To apply a transformation to this grid, click on "Apply Function". 
+Another window will pop up which asks you to type in a function formula in 
+terms of the complex independent variable s.
+
+A good first example is the squaring function, so type "s^2" into the top box 
+and click OK. A new frame will appear in the frame list called "Range" which 
+is the result of moving every point of the "Domain" frame to its square. Click 
+"PLAY!" to watch the transformation. Note that while the animation is 
+playing you can click anywhere in the screen to pause it, and click it again to 
+resume.
+
+For a more complete explanation of all of Morpho's features (and other 
+useful tricks), see below. Also try loading some of the preloaded animations 
+to see some of the other kinds of transformations and animations Morpho is 
+capable of. All of the preloaded animations are explained in more detail 
+down below.
+
+-=Main Window=-
+
+VIEW PANEL:
+The top of the main window is the View panel. Here you can decide what 
+window of the complex plane is visible during an animation. The entry boxes 
+correspond to the minimum and maximum real and imaginary parts.
+
+WINDOW SHAPE:
+Below the View panel you can input the dimensions of the window that will 
+be displayed when the Play button is hit. It is in units of horizontal pixels X 
+vertical pixels. You can also hit the "Scale to View" button which will 
+automatically adjust the window dimensions so that the display window is in 
+scale with the view of the complex plane (i.e. circles will actually look like 
+circles and not stretched in any way).
+
+FRAME RATE:
+Pretty self-explanatory. You can choose what frame rate to run the 
+animation at. Common values are 30, 60, and 48.
+
+Note that depending on the resolution and number of grid lines used in the 
+Domain frame, the animation may run laggy at higher frame rates. If this 
+happens, you can check the Prerender box, which will then prerender all of 
+the animation frames before playing them in order to speed up the playback. 
+The main drawback to this approach is the animation will take longer to 
+load and may consume a large part of your computer's memory if the 
+animation is very large or long.
+
+Unfortunately, you may have to play around with these options a bit if you 
+want the animation to run as crisply and smoothly as possible. I've found it 
+to behave rather unpredictably on my own machine, but the best results 
+seem to occur if you run the animation at 60 fps with prerendering. 
+However, if that's not a major concern for you, 30 fps with no prerendering 
+is probably satisfactory for the default Domain grid (see below for more on 
+how to modify the Domain grid).
+
+TWEEN METHOD:
+This determines the style of the animation between frames. You'll probably 
+understand them best if you just try out both of them. Still, here's an 
+explanation for exactly what they do:
+
+"Direct" means every point moves in a straight line to its target point in the 
+next frame.
+"Spiral" means every point will move in a spiral path to its target point in 
+the next frame.
+
+TRANSITION:
+This determines the timing of the transition between two frames.
+
+"Slow-Fast-Slow" means the animation will start out slow, speed up, and 
+then slow down when nearing the next frame.
+"Steady" means the animation will move at a constant speed.
+
+I usually just keep this set at the default of Slow-Fast-Slow since it's the 
+most visually pleasing.
+
+FRAME LIST:
+All the (key)frames of animation are listed here. A new frame is created by 
+clicking the "Apply Function" button (described below). At the start, the 
+frame list will contain only one frame, the Domain frame, which is just the 
+initial grid. You can modify the initial grid by clicking the "Edit" button while 
+the Domain frame is highlighted (described in more detail below).
+
+When you have a list of frames, you can reorder them however you want 
+using the buttons on the right side. The animation will play starting from the 
+top-most frame and proceeding down the list. You can also apply a function 
+to any of the frames in the frame list to make a new frame. You can also 
+edit any frame after it's been created by clicking the "Edit" button, and 
+delete a frame by clicking "Delete". Note that if you delete a frame that is a 
+"parent" of other frames, you will delete all frames that are dependent on it.
+
+SAVING/LOADING:
+If you've made an animation you want to save for later, you can save it by 
+clicking the "Save" button. This saves the animation as an "MRM" file, which 
+stands for "MoRpho aniMation". Once saved, you can load an animation back 
+in by clicking the "Load" button.
+
+Note that the first time you click the "Load" button, a warning will pop up. 
+This is a reminder to be careful before playing any animation you obtain 
+from an untrusted source, since there is a small risk that an attacker could 
+find a way to pass off harmful code as a function to be applied to a frame. 
+I've put in strong safety measures to try and make sure this is impossible, 
+but sadly, the nature of the case means I can't guarantee that. However, as 
+the warning says, you don't need to worry about this if you're loading 
+animations from trusted sources such as your own animations or the 
+animations that came preloaded with Morpho.
+
+-=Apply Function=-
+
+This is where the action is. Click the "Apply Function" button from the main 
+window to generate a new frame by applying a function to the highlighted 
+frame. When you do, a new window will pop up prompting you for the 
+following settings. You can change any of these later by clicking the "Edit" 
+button.
+
+FUNCTION:
+The first box prompts you to enter a formula in terms of the complex 
+variable s that describes the function to be applied. The default formula is 
+simply "s", representing the identity function. Applying this function simply 
+generates a copy of the original frame---an often useful thing to do.
+
+Morpho supports a plethora of functions which are described in more detail 
+below, but they include standard math functions such as sqrt, sin, cos, exp, 
+log.
+
+NAME:
+Next you get to decide a name for the new frame. The default is "Range" or 
+something similar, but you can name it almost anything as long as it doesn't 
+conflict with an existing name in the frame list.
+
+HIDDEN:
+Check this box if you want Morpho to skip this frame when playing the 
+animation. This is useful if you constructed a frame from an intermediate 
+frame, but don't want to show the intermediate frame. A common case 
+where this happens is if you want to modify the Domain frame to something 
+other than the standard rectangular grid. If you have another frame that 
+you'd rather serve as the starting grid, you can put that frame at the top and 
+hide the Domain frame. I did this a number of times in the preloaded 
+animations.
+
+Note that if you hide a frame, its name will be followed by triple asterisks 
+(***) in the frame list.
+
+TWEEN DURATION:
+This determines how long the transition between the previous frame and 
+the current frame should take. If the current frame is the FIRST frame (i.e. 
+having no preceding frame), then this value is ignored.
+
+DELAY:
+This is how long Morpho should pause at the given frame before beginning 
+the transition to the next frame.
+
+-=Domain Editor=-
+
+This gives you control over the initial Domain grid.
+
+GRID TYPE:
+There are two options here: "Standard" and "Zeta". Almost always you'll 
+want to use the Standard grid. Zeta is a special grid that is optimized for 
+animating the Riemann Zeta function. Also note that because the Zeta grid 
+has a very specific use case in mind, it ignores many of the other settings 
+such as line count, midlines, Axes, and the Static BG grid.
+
+LINE COUNT:
+Specify how many horizontal and vertical lines to draw. Keep in mind that 
+these include the four lines that make up the boundary of the display 
+window. 11 is the default value for each since this will result in major grid 
+lines that are spaced one unit apart from one another in the default view.
+
+RESOLUTION:
+A factor that indicates how much extra resolution should be given to the 
+grid. i.e. A resolution of 2 means twice as many data points comprise each 
+line of the grid. You should increase this value if your function strongly 
+stretches and curves the grid or if you notice curves becoming polygonal 
+paths when animated.
+
+Inversely, if your grid doesn't curve the lines very much (e.g. matrix 
+multiplication), you can get away with a much lower resolution value, which 
+can sometimes speed up an animation substantially especially if it has many 
+grid lines. In fact, if your animation consists exclusively of matrix 
+transformations, you can set the resolution as low as 0.05, which is what I 
+did in many of the preloaded linear algebra animations.
+
+MIDLINES:
+Uncheck these boxes if you don't want to plot the thinner and lighter blue 
+lines that are midway between the major grid lines.
+
+AXES:
+Uncheck this box to remove the white axis lines from the animation.
+
+STATIC BG GRID:
+Checking this box leaves a dim copy of the major grid lines in the 
+background during an animation.
+
+HIDDEN, TWEEN DURATION, DELAY:
+Same as the Apply Function window.
+
+-=Available Functions=-
+
+Morpho supports almost every function from the "math" and "cmath" 
+modules in Python.
+These include sqrt, exp, log, sin, cos, tan.
+
+You also have access to complex number-specific functions like
+real (or Re), imag (or Im), conj, arg (or angle or phase), abs, i (or j or 1j)
+
+Morpho also supports 2x2 matrix multiplication by treating the real and 
+imaginary parts of the complex variable s as a 2D column vector. You can 
+construct a 2x2 matrix with this function:
+mat(a,b,c,d)
+where this is read "row-by-row", i.e. this is the matrix
+a b
+c d
+To apply this matrix transformation to every point in the grid, type
+mat(a,b,c,d)*s
+You can also perform matrix arithmetic such as addition, multiplication 
+(scalar and matrix), and matrix powers (including -1). You also have access 
+to the determinant function det, transpose with the following expression:
+mat(a,b,c,d).T
+and matrix inverse either by
+mat(a,b,c,d)^-1, or mat(a,b,c,d).inv
+See the preloaded linear algebra animations to see more examples of 
+matrix transformations.
+
+Again treating complex values as 2D vectors, you can also take the Lp norm 
+with the following expression:
+norm(s, p)
+which returns ||s||_p where s is treated as a 2D vector.
+p can be any positive real number including infinity which is denoted inf.
+
+You can also plot piecewise functions like
+s^2  if Re(s) > 0
+-s^2 else
+with the following formula
+s^2 if Re(s) > 0 else -s^2.
+
+If you have more than two pieces, such as
+s^2    if Re(s) > 0
+-s^2   if Re(s) < 0
+sin(s) else
+you can chain the if-else expressions like this:
+s^2 if Re(s) > 0 else -s^2 if Re(s) < 0 else sin(s)
+
+Note that you must always end a piecewise chain with an else expression. 
+So if you have a piecewise function without an else clause like
+s^2  if Re(s) > 1
+-s^2 if Re(s) < -1
+you can put nan for the else expression like this:
+s^2 if Re(s) > 1 else -s^2 if Re(s) < -1 else nan
+
+This is often useful if you need to "throw away" part of the initial grid. For 
+example, if you only need the right half plane, you can apply the piecewise 
+function
+s if Re(s) > 0 else nan
+to the Domain frame and then hide the original Domain frame.
+See animations/preloaded/Complex Functions/zeta approx.mrm for an 
+example of this.
+
+Also, note that an equality condition must be specified using DOUBLE equal 
+signs.
+For example, to properly input this piecewise function:
+s^2 if Im(s) = 0
+you must type
+s^2 if Im(s) == 0 else nan
+
+To summarize, the relations equal, not equal, greater, less, greater or equal, 
+less or equal are given by
+==, !=, >, <, >=, <= respectively.
+You can also string multiple conditions together using and, or, not.
+
+You can also input sum formulas like
+ 10
+----   1
+\    -----
+/       s
+----   n
+n=1
+
+by using the expression
+sum(1/n^s for n in seq(1,10))
+
+You can also do step sizes besides +1 to get sums like
+ 10
+----   1
+\    -----
+/       s
+----   n
+n=2
+even n
+
+by using the expression
+sum(1/n^s for n in seq(2,10,2))
+
+More examples are shown in the preloaded animations.
+
+-=Preloaded Animations=-
+
+Morpho comes preloaded with a number of example animations. You can 
+find these in the animations folder within the main Morpho folder. There are 
+three categories of preloaded animations: Complex Functions, Fun, Linear 
+Algebra.
+
+Complex Functions contains animations that animate various common 
+complex functions such as log, powers, reciprocal, sine, cosine, exponential, 
+and zeta.
+
+Fun contains animations that are just fun to look at and don't necessarily 
+illustrate any mathematical concepts. However, I think it's a good exercise 
+to look into the function formulas and try to figure out why they do what 
+they do.
+
+Linear Algebra contains various illustrations of concepts from linear algebra. 
+These include matrix inversion and transposition, as well as an illustration of 
+diagonalization, and unit circles with respect to various Lp norms.
+
+A description of each preloaded animation follows:
+
+COMPLEX FUNCTIONS
+
+log.mrm: An illustration of the natural logarithm extended to the complex 
+plane.
+
+power seq.mrm: This is the introductory animation. This animates the first 5 
+powers of s:
+s^2, s^3, s^4, s^5
+but scaled down at each step so that the transformation stays within the 
+view window.
+
+reciprocal.mrm: This just illustrates the reciprocal function 1/s, but scaled 
+up by a factor of 10 to make it easier to see the details of the 
+transformation.
+
+sin cos exp.mrm: An illustration of sin(s), cos(s), and exp(s) in the complex 
+plane. You might try scaling these functions down in order to see more of 
+their behavior outside the view window.
+
+square root.mrm: An illustration of the square root function extended to the 
+complex plane. Can you guess why this transformation is discontinuous?
+
+tan.mrm: An illustration of the tangent function. Again, you might try scaling 
+this function down to see more of the transformed grid.
+
+zeta approx.mrm: Successive approximations of the Riemann Zeta function 
+using its sum definition in the right half-plane. I was surprised at how slowly 
+it converges to the true Zeta function.
+
+zeta.mrm: The Zeta function in all its glory "as seen on TV". This animations 
+tries to closely mimic the animation shown in 3Blue1Brown.
+
+FUN
+
+3Blue1Brown.mrm: A rendition of the 3Blue1Brown logo.
+
+flowers.mrm: A sequence of plots that resemble flowers. They should look 
+familiar if you've ever graphed r = sin(n*theta) in polar coordinates.
+
+pinch cascade.mrm: This came about from repeatedly applying disk(s) to 
+grids, which compresses squares into their inscribed circles.
+
+Twist.mrm: The grid is twisted in such a way that the further a point is from 
+the origin, the more strongly it is rotated.
+
+X.mrm: I forget exactly where this one came from. But it was another result 
+of experimenting around.
+
+Zero.mrm: Really basic, but fun to watch. This is what you get if you send 
+every point to the origin while using the Spiral tween method.
+
+LINEAR ALGEBRA
+
+diagonalization.mrm: An illustration of the process of diagonalizing a 
+matrix.
+First a linear transformation is shown. Next, by changing into the eigenbasis 
+(i.e. coordinate system where the standard unit vectors represent linearly 
+independent eigenvectors of the matrix), we can apply the transformation 
+by multiplying by a diagonal matrix, which visually looks like stretching the 
+grid purely in the x and y directions. Next we undo the change of 
+coordinates and return to the standard basis. The resulting grid exactly 
+matches the original transformation.
+
+inverse.mrm: An demonstration of matrix inversion.
+
+norms.mrm: Two grids illustrating the L1 and L-infinity norms. The grids 
+show what the space would look like if every point was moved so that its 
+distance to the origin matched its L1 or L-infinity distance. Accordingly, most 
+points move away from the origin in the L1-space since the L1 norm is 
+generally larger than the regular Euclidean L2-norm, and those same points 
+move closer to the origin in the second grid since the L-infinity norm is 
+generally smaller than the regular Euclidean norm.
+
+shear.mrm: Simple animation showcasing the shear transformation.
+
+transpose.mrm: Shows a transformation and then what its transpose (dual) 
+looks like.
+
+unit circles.mrm: A sequence of grids showing what the unit circle looks like 
+under various Lp-norms (although it should be noted that L-2/3 and L-1/3 
+are not true norms since they violate the triangle inequality).
