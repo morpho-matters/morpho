@@ -16,11 +16,11 @@ Morpho was written in Python 3 and requires three external modules:
 - numpy
 - mpmath
 
-You should be able to obtain these with the following pip commands:
+You should be able to obtain these with the following pip3 commands:
 
-- pip install pyglet
-- pip install numpy
-- pip install mpmath
+- pip3 install pyglet
+- pip3 install numpy
+- pip3 install mpmath
 
 -=How to Use=-
 
