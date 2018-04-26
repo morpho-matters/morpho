@@ -51,6 +51,8 @@ whitelist = {
 "ln",
 "tau",
 "fact",
+"sgn",
+"sign",
 
 "1j",
 "real",
