@@ -96,5 +96,9 @@ def prod(a):
     for n in a:
         p *= n
     return p
-
 product = prod
+
+# Signum function. Not implemented for complex numbers.
+# Returns +1 given positive number, -1 given negative number,
+# and 0 given 0.
+sgn = sign = lambda x: 0 if x==0 else x/abs(x)
