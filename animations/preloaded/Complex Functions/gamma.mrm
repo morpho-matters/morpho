@@ -1,0 +1,67 @@
+Morpho animation file
+
+1.01
+
+window_height : 600
+prerender : False
+imagMax : 2.0
+frameRate : 30.0
+transition : 0
+imagMin : -2.0
+realMax : 2.0
+tweenMethod : direct
+realMin : -2.0
+window_width : 600
+
+delay : 0.0
+id : 0
+hide : False
+nhorz : 11
+vertMidlines : True
+BG : (0.0, 0.0, 0.0)
+horzRes : 1.0
+grid : Standard
+name : Domain
+tweenDuration : 3.0
+nvert : 11
+vertRes : 1.0
+type : domain
+axes : True
+horzMidlines : True
+BGgrid : True
+
+name : Gamma
+tweenDuration : 3.0
+delay : 2.0
+base : 0
+type : range
+hide : False
+id : 1
+function : gamma(s)
+
+name : Domain copy
+tweenDuration : 3.0
+delay : 1.0
+base : 0
+type : range
+hide : False
+id : 2
+function : s
+
+name : Polar grid
+tweenDuration : 1.0
+delay : 1.0
+base : 2
+type : range
+hide : False
+id : 3
+function : polargrid(s)
+
+name : Polar Gamma
+tweenDuration : 3.0
+delay : 2.0
+base : 3
+type : range
+hide : False
+id : 4
+function : gamma(s)
