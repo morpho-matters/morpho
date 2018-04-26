@@ -102,3 +102,10 @@ product = prod
 # Returns +1 given positive number, -1 given negative number,
 # and 0 given 0.
 sgn = sign = lambda x: 0 if x==0 else x/abs(x)
+
+# Complex gamma function
+def gamma(s):
+    try:
+        return mp.gamma(s)
+    except ValueError:
+        return nan
