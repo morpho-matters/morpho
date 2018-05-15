@@ -20,6 +20,7 @@ dialog = messagebox  # I like the name "dialog" better
 
 import os
 import subprocess as sp
+import platform
 
 import morpho.engine as eng
 import morpho.whitelist as wh
@@ -41,6 +42,8 @@ from morpho.functions import *
 isbadnum = eng.isbadnum
 # Code tells sp.call() not to make a console window
 CREATE_NO_WINDOW = 0x08000000
+# Current directory in this system
+dotslash = os.curdir + os.sep
 
 # Set exportMode to True if you're going to export Morpho
 # as a standalone using pyinstaller.
@@ -70,6 +73,7 @@ class RootWindow(object):
             self.settings = getSettings()
         else:
             self.settings = settings
+        self.exportFormat = ""
 
         # Hidden variables
         self.frames = [self.domain]  # Framedata objects
@@ -589,7 +593,7 @@ class RootWindow(object):
         if not self.sanityCheck(): return
 
         try:
-            self.save("./lastplay.mrm")
+            self.save(dotslash + "lastplay.mrm")
         except PermissionError:
             dialog.showerror(
                 "File permission error",
@@ -608,7 +612,10 @@ class RootWindow(object):
         # If you're just trying to run the script, exportMode should
         # be set to False.
         if exportMode:
-            sp.call("player.exe", creationflags=CREATE_NO_WINDOW)
+            if platform.system() == "Windows":
+                sp.call("player.exe", creationflags=CREATE_NO_WINDOW)
+            else:
+                sp.call(dotslash + "player", creationflags=CREATE_NO_WINDOW)
         else:
             sp.call("python player.py", creationflags=CREATE_NO_WINDOW)
 
@@ -741,7 +748,8 @@ class RootWindow(object):
             mation.prerender()
 
         # RUN!!!!
-        mation.run()
+        # mation.run()
+        mation.export()
 
     # Attempt to read in the animation file
     # Check that it's a valid MRM file also.
@@ -782,6 +790,8 @@ class RootWindow(object):
         with open(filename, "r") as file:
             sections = file.read().strip().split("\n\n")
         preamble = sections[0]
+        if preamble == "Morpho animation file export gif":
+            self.exportFormat = "gif"
         if preamble != "Morpho animation file":
             raise FileFormatError("Invalid morpho animation file")
         try:
@@ -915,7 +925,7 @@ class RootWindow(object):
         # Ask the user (possibly repeatedly) where to save the file.
         while True:
             filename = filedialog.asksaveasfilename(
-                initialdir="./animations", defaultextension="mrm",
+                initialdir=dotslash+"animations", defaultextension="mrm",
                 filetypes=(("Morpho Animation", "*.mrm"),)
                 )
 
@@ -956,7 +966,7 @@ class RootWindow(object):
         # Ask the user (possibly repeatedly) for the file to open.
         while True:
             filename = filedialog.askopenfilename(
-                initialdir="./animations", defaultextension="mrm",
+                initialdir=dotslash+"animations", defaultextension="mrm",
                 filetypes=(("Morpho Animation", "*.mrm"), ("All Files", "*.*"))
                 )
 
@@ -1571,7 +1581,7 @@ defaultSettings = {
 }
 
 # Read in special settings from file
-def getSettings(filename="./settings.dat"):
+def getSettings(filename=dotslash+"settings.dat"):
     try:
         with open(filename, "r") as file:
             raw = file.read()
@@ -1590,7 +1600,7 @@ def getSettings(filename="./settings.dat"):
 
 # Save current special settings as a file
 # Returns True/False based on success/failure
-def saveSettings(settings, filename="./settings.dat", showerror=True):
+def saveSettings(settings, filename=dotslash+"settings.dat", showerror=True):
     # Stringify settings
     content = ""
     for key in settings:
@@ -1615,7 +1625,7 @@ def saveSettings(settings, filename="./settings.dat", showerror=True):
 def startGUI():
     # If this is the first-time launch of Morpho, show off
     # the Power Sequence Animation
-    if not os.path.isfile("./settings.dat"):
+    if not os.path.isfile(dotslash+"settings.dat"):
         # Make this file so the next time Morpho is launched,
         # it doesn't show off.
         if not saveSettings(defaultSettings, showerror=False):
@@ -1626,7 +1636,10 @@ def startGUI():
             return
 
         if exportMode:
-            sp.call("player.exe", creationflags=CREATE_NO_WINDOW)
+            if platform.system() == "Windows":
+                sp.call("player.exe", creationflags=CREATE_NO_WINDOW)
+            else:
+                sp.call(dotslash + "player", creationflags=CREATE_NO_WINDOW)
         else:
             sp.call("python player.py", creationflags=CREATE_NO_WINDOW)
 
