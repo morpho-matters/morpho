@@ -3,6 +3,7 @@ from __future__ import division  # For Python 2
 
 import pyglet as pg
 pyglet = pg
+import morpho.giffer as giffer
 # import time
 import math
 import cmath
@@ -735,9 +736,11 @@ class Animation(object):
         @self.window.event
         def on_close(mation=self):
             # Reset active animation attributes
+            mation.active = False
             mation.window = None
             mation.update = None
-            mation.active = False
+            mation.paused = False
+            mation.currentFrame = 0
             mation.delay = 0
 
         @self.window.event
@@ -747,10 +750,6 @@ class Animation(object):
             else:
                 mation.pause()
 
-        # @self.window.event
-        # def on_mouse_release(x, y, button, modifiers, mation=self):
-        #     mation.resume()
-
         # Reset delay attribute
         self.delay = 0
 
@@ -758,9 +757,82 @@ class Animation(object):
 
         pg.app.run()
         pg.app.exit()
-        pg.clock.unschedule(self.update)
 
-        pg.clock.unschedule(self.update)
+    def export(self):
+        if len(self.keyframes) == 0:
+            raise Exception("Can't export animation with no keyframes!")
+        if len(self.frameCount) != len(self.keyframes) - 1:
+            raise Exception("len(frameCount) != len(keyframes)-1")
+
+        if self.window == None: self.setupWindow()
+
+        self.active = True
+        self.window.switch_to()  # Focus on this window for rendering.
+
+        def update(dt, mation=self):
+            animationEnd = False
+            # Reached end of animation. Render final keyframe.
+            if mation.currentFrame >= sum(mation.frameCount):
+                mation.keyframes[-1].plot(mation.view, mation.window)
+                mation.active = False
+                pg.clock.unschedule(mation.update)
+                animationEnd = True
+            else:
+                # Compute which keyframe and subFrame we need to plot
+                keyID = 0
+                subFrame = mation.currentFrame
+                while subFrame >= mation.frameCount[keyID]:
+                    subFrame -= mation.frameCount[keyID]
+                    keyID += 1
+
+                if subFrame == 0:
+                    frm = mation.keyframes[keyID]
+                else:
+                    frm = mation.keyframes[keyID].tween( \
+                        mation.keyframes[keyID+1], \
+                        mation.transition(subFrame/mation.frameCount[keyID]), \
+                        mation.tweenMethod)
+
+                frm.plot(mation.view, mation.window)
+
+            # Save current frame as numbered PNG image.
+            filename = "./export/" + int2fixedstr(mation.currentFrame, \
+                digits=1+int(math.log10(sum(mation.frameCount)))) + ".png"
+            pyglet.image.get_buffer_manager().get_color_buffer().save(filename)
+
+            if animationEnd:
+                pg.app.exit()
+                mation.window.close()
+                resetMation()
+            else:
+                mation.currentFrame += 1
+
+        self.update = update
+
+        @self.window.event
+        def on_draw(mation=self):
+            pass
+
+        def resetMation(mation=self):
+            # Reset active animation attributes
+            mation.active = False
+            mation.window = None
+            mation.update = None
+            mation.paused = False
+            mation.currentFrame = 0
+            mation.delay = 0
+
+        @self.window.event
+        def on_close(mation=self):
+            resetMation()
+
+        # Reset delay attribute
+        self.delay = 0
+
+        pg.clock.schedule_interval(self.update, 1e-12)
+
+        pg.app.run()
+        pg.app.exit()
 
     def pause(self):
         if not self.active: return
@@ -952,6 +1024,13 @@ def flattenList(a):
         for item in sublist:
             flattened.append(item)
     return flattened
+
+# Converts an int into a string of fixed length given by the
+# parameter digits. Works by prepending zeros if the string
+# is too short.
+def int2fixedstr(n, digits=3):
+    str_n = str(n)
+    return "0"*(digits-len(str_n)) + str_n
 
 # Computes the correct amount to shift an angle th1 so that it
 # becomes th2 in the shortest possible path
