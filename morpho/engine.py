@@ -7,7 +7,10 @@ import morpho.giffer as giffer
 # import time
 import math
 import cmath
+import os
 # import traceback
+
+dotslash = os.curdir + os.sep
 
 ### CONSTANTS ###
 pi = cmath.pi
@@ -796,7 +799,7 @@ class Animation(object):
                 frm.plot(mation.view, mation.window)
 
             # Save current frame as numbered PNG image.
-            filename = "./export/" + int2fixedstr(mation.currentFrame, \
+            filename = dotslash+"export"+os.sep + int2fixedstr(mation.currentFrame, \
                 digits=1+int(math.log10(sum(mation.frameCount)))) + ".png"
             pyglet.image.get_buffer_manager().get_color_buffer().save(filename)
 
