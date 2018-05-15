@@ -44,9 +44,10 @@ class Point(object):
         P.pos = self.pos
         P.strokeWeight = self.strokeWeight
         # P.color = self.color
-        P.fill = self.fill
+        P.fill = self.fill[:]
         P.style = self.style
         P.size = self.size
+        P.static = self.static
         return P
 
     # Returns "tweened" point between p and q given time t in [0,1]
@@ -176,7 +177,7 @@ class Path(object):
         C = Path()
         C.seq = self.seq[:]
         C.interp = self.interp
-        C.color = self.color
+        C.color = self.color[:]
         C.width = self.width
         C.deadends = self.deadends.copy()
         C.static = self.static
@@ -363,7 +364,7 @@ class Frame(object):
         frame = Frame()
         frame.points = self.points[:]
         frame.paths = self.paths[:]
-        frame.background = self.background
+        frame.background = self.background[:]
         frame.delay = self.delay
         frame.optimized = self.optimized
         return frame
@@ -617,15 +618,20 @@ class Animation(object):
     def copy(self):
         ani = Animation()
         ani.keyframes = self.keyframes[:]
-        ani.frameCount = self.frameCount
+        ani.frameCount = self.frameCount[:]
         ani.frameRate = self.frameRate
-        ani.view = self.view
+        ani.view = self.view[:]
+        ani.windowShape = self.windowShape[:]
         ani.transition = self.transition
         ani.tweenMethod = self.tweenMethod
         ani.prerendered = self.prerendered
+        ani.vertexMode = self.vertexMode
+        ani.colorMode = self.colorMode
         ani.frames = self.frames[:]
-        ani.batches = self.batches[:]
-        ani.vlists = self.vlists[:]
+        ani.path_batches = self.path_batches[:]
+        ani.point_batches = self.point_batches[:]
+        ani.path_vlists = self.path_vlists[:]
+        ani.point_vlists = self.point_vlists[:]
 
         ani.currentFrame = self.currentFrame
         ani.delay = self.delay
