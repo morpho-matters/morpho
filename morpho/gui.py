@@ -26,7 +26,7 @@ import morpho.engine as eng
 import morpho.whitelist as wh
 
 # Current Morpho version
-version = 1.01
+version = 1.02
 
 # fileVersion should only be changed when animations saved with
 # an updated version of Morpho can't be played by older versions.
@@ -73,7 +73,7 @@ class RootWindow(object):
             self.settings = getSettings()
         else:
             self.settings = settings
-        self.exportFormat = ""
+        self.exportFilename = ""
 
         # Hidden variables
         self.frames = [self.domain]  # Framedata objects
@@ -607,17 +607,7 @@ class RootWindow(object):
                 )
             return
 
-        # exportMode should be set to True at the beginning of this file
-        # if you're about to export Morpho as a standalone.
-        # If you're just trying to run the script, exportMode should
-        # be set to False.
-        if exportMode:
-            if platform.system() == "Windows":
-                sp.call("player.exe", creationflags=CREATE_NO_WINDOW)
-            else:
-                sp.call(dotslash + "player", creationflags=CREATE_NO_WINDOW)
-        else:
-            sp.call("python player.py", creationflags=CREATE_NO_WINDOW)
+        callPlayer()
 
     # This method will ACTUALLY play the animation.
     # The play() method just writes the animation
@@ -744,12 +734,34 @@ class RootWindow(object):
                 max(2, round(visibleFrames[n].tweenDuration*frameRate)))
 
         # Prerender if necessary
-        if prerender:
+        if prerender and self.exportFilename == "":
             mation.prerender()
 
-        # RUN!!!!
-        # mation.run()
-        mation.export()
+        # RUN!!!! (or export)
+        if self.exportFilename[-4:].lower() == ".gif":
+            try:
+                mation.export(self.exportFilename)
+            except PermissionError:  # Temp folder clean up failed.
+                dialog.showerror(
+                    "Clean up Error",
+                    "Morpho couldn't properly read or write to its \"temp\" directory. The resulting GIF (if it was created) may be flawed."
+                    )
+            except eng.FrameSaveError:  # PNG export of mframe failed
+                dialog.showerror(
+                    "Frame Save Error",
+                    "Morpho couldn't save all the frames of the animation."
+                    )
+            except eng.GifError:
+                dialog.showerror(
+                    "GIF Error",
+                    "Morpho couldn't properly assemble all of the frames together into a GIF. The resulting GIF (if it was created) may be flawed.")
+            except:  # Unknown error
+                dialog.showerror(
+                    "Unknown Error",
+                    "An error occurred when exporting this animation. The resulting GIF (if it was created) may be flawed."
+                    )
+        else:
+            mation.run()
 
     # Attempt to read in the animation file
     # Check that it's a valid MRM file also.
@@ -790,9 +802,10 @@ class RootWindow(object):
         with open(filename, "r") as file:
             sections = file.read().strip().split("\n\n")
         preamble = sections[0]
-        if preamble == "Morpho animation file export gif":
-            self.exportFormat = "gif"
-        if preamble != "Morpho animation file":
+        if "Morpho animation file export filename:" in preamble:
+            # Extract actual GIF filename to create
+            self.exportFilename = preamble[38:]
+        elif preamble != "Morpho animation file":
             raise FileFormatError("Invalid morpho animation file")
         try:
             loadedVersion = float(sections[1])
@@ -872,7 +885,7 @@ class RootWindow(object):
     # Saves the GUI state into the given filename.
     # This function will give no warning about overwriting a file!
     # Returns True if save was successful. Else False.
-    def save(self, filename):
+    def save(self, filename, exportFilename=""):
         # sanityCheck widget inputs
         if not self.sanityCheck(): return
 
@@ -903,7 +916,11 @@ class RootWindow(object):
         }
 
         # Stringify all the data and prepare it to be written
-        content = "Morpho animation file\n\n"+str(fileVersion)+"\n\n"
+        if exportFilename == "":
+            preamble = "Morpho animation file"
+        else:
+            preamble = "Morpho animation file export filename:"+exportFilename
+        content = preamble + "\n\n"+str(fileVersion)+"\n\n"
         for key in state:
             content += key + " : " + str(state[key]) + "\n"
         content += "\n"
@@ -926,26 +943,48 @@ class RootWindow(object):
         while True:
             filename = filedialog.asksaveasfilename(
                 initialdir=dotslash+"animations", defaultextension="mrm",
-                filetypes=(("Morpho Animation", "*.mrm"),)
+                filetypes=(("Morpho Animation", "*.mrm"), ("GIF animation", "*.gif"))
                 )
 
             if filename == "": return
 
-            # Try to save the file
-            try:
-                self.save(filename)
-            except PermissionError:
-                dialog.showerror(
-                    "Permission Error!",
-                    "Can't save in that location. Access denied. You'll have to save the file somewhere else."
-                    )
-                continue
-            except:
-                dialog.showerror(
-                    "Unknown error",
-                    "Some unknown error prevented saving in that location. Try saving somewhere else."
-                    )
-                continue
+            # Handle GIF export case
+            if filename[-4:].lower() == ".gif":
+                # Save MRM in export mode to lastplay.mrm
+                try:
+                    self.save(dotslash+"lastplay.mrm", exportFilename=filename)
+                except PermissionError:
+                    dialog.showerror(
+                        "File permission error",
+                        "Morpho doesn't have permission to write files in its own directory. This is required in order to export animations."
+                        )
+                    return
+                except:
+                    dialog.showerror(
+                        "File error",
+                        "Morpho isn't able to write files in its own directory. This is required in order to export animations."
+                        )
+                    return
+
+                # Execute the player
+                callPlayer()
+
+            else:
+                # Try to save the file
+                try:
+                    self.save(filename)
+                except PermissionError:
+                    dialog.showerror(
+                        "Permission Error!",
+                        "Can't save in that location. Access denied. You'll have to save the file somewhere else."
+                        )
+                    continue
+                except:
+                    dialog.showerror(
+                        "Unknown error",
+                        "Some unknown error prevented saving in that location. Try saving somewhere else."
+                        )
+                    continue
             break
 
     def loadButton(self):
@@ -1575,6 +1614,21 @@ def str2floatTuple(st):
     return tuple(float(item.strip()) \
         for item in st.replace("(", "").replace(")", "").split(","))
 
+# Calls either the player script or external executable
+# which will play the animation separate from the main GUI.
+def callPlayer():
+    # exportMode should be set to True at the beginning of this file
+    # if you're about to export Morpho as a standalone.
+    # If you're just trying to run the script, exportMode should
+    # be set to False.
+    if exportMode:
+        if platform.system() == "Windows":
+            sp.call("player.exe", creationflags=CREATE_NO_WINDOW)
+        else:
+            sp.call(dotslash + "player", creationflags=CREATE_NO_WINDOW)
+    else:
+        sp.call("python player.py", creationflags=CREATE_NO_WINDOW)
+
 # Default special settings for the GUI
 defaultSettings = {
     "showLoadWarning" : True
@@ -1635,13 +1689,7 @@ def startGUI():
                 )
             return
 
-        if exportMode:
-            if platform.system() == "Windows":
-                sp.call("player.exe", creationflags=CREATE_NO_WINDOW)
-            else:
-                sp.call(dotslash + "player", creationflags=CREATE_NO_WINDOW)
-        else:
-            sp.call("python player.py", creationflags=CREATE_NO_WINDOW)
+        callPlayer()
 
     rootWin = RootWindow()
     try:
