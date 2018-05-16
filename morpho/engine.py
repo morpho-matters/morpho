@@ -7,7 +7,7 @@ import morpho.giffer as giffer
 # import time
 import math
 import cmath
-import os
+import os, shutil
 # import traceback
 
 dotslash = os.curdir + os.sep
@@ -19,6 +19,14 @@ inf = float("inf")
 nan = float("nan")
 # Detect infinite or nan (real or complex)
 isbadnum = lambda x: math.isnan(abs(x)*0)
+
+### SPECIAL EXCEPTIONS ###
+
+class FrameSaveError(Exception):
+    pass
+
+class GifError(Exception):
+    pass
 
 ### CLASSES ###
 
@@ -767,7 +775,7 @@ class Animation(object):
         pg.app.exit()
 
     # Exports the animation as an animated GIF
-    def export(self):
+    def export(self, filename):
         if len(self.keyframes) == 0:
             raise Exception("Can't export animation with no keyframes!")
         if len(self.frameCount) != len(self.keyframes) - 1:
@@ -778,6 +786,9 @@ class Animation(object):
         self.active = True
         self.window.switch_to()  # Focus on this window for rendering.
 
+        # Describes the delay of each gif frame of animation.
+        # It is equal to 1/frameRate unless there's a keyframe delay.
+        gifDelays = [1.0/self.frameRate]*(1+sum(self.frameCount))
         def update(dt, mation=self):
             animationEnd = False
             # Reached end of animation. Render final keyframe.
@@ -786,6 +797,8 @@ class Animation(object):
                 mation.active = False
                 pg.clock.unschedule(mation.update)
                 animationEnd = True
+                gifDelays[-1] = \
+                    max(1.0/mation.frameRate, mation.keyframes[-1].delay/mation.frameRate)
             else:
                 # Compute which keyframe and subFrame we need to plot
                 keyID = 0
@@ -796,6 +809,8 @@ class Animation(object):
 
                 if subFrame == 0:
                     frm = mation.keyframes[keyID]
+                    gifDelays[mation.currentFrame] = \
+                        max(1.0/mation.frameRate, mation.keyframes[keyID].delay/mation.frameRate)
                 else:
                     frm = mation.keyframes[keyID].tween( \
                         mation.keyframes[keyID+1], \
@@ -804,15 +819,33 @@ class Animation(object):
 
                 frm.plot(mation.view, mation.window)
 
-            # Save current frame as numbered PNG image.
-            filename = dotslash+"export"+os.sep + int2fixedstr(mation.currentFrame, \
-                digits=1+int(math.log10(sum(mation.frameCount)))) + ".png"
-            pyglet.image.get_buffer_manager().get_color_buffer().save(filename)
+            # Save current frame as a numbered PNG image.
+            imgfile = dotslash+"temp"+os.sep + int2fixedstr(mation.currentFrame, \
+                digits=1+int(math.log10(max(1,sum(mation.frameCount))))) + ".png"
+            try:
+                pyglet.image.get_buffer_manager().get_color_buffer().save(imgfile)
+            except:
+                raise FrameSaveError
 
             if animationEnd:
                 pg.app.exit()
                 mation.window.close()
                 resetMation()
+
+                # Make the GIF!
+                try:
+                    giffer.makegif(directory=dotslash+"temp", saveas=filename, duration=gifDelays)
+                    giffer.optimizegif(filename)
+                except:
+                    raise GifError
+
+                # Clean up temp directory now that we're done
+                try:
+                    if os.path.isdir(dotslash+"temp"):
+                        shutil.rmtree(dotslash+"temp")
+                    os.makedirs(dotslash+"temp")
+                except:
+                    raise PermissionError
             else:
                 mation.currentFrame += 1
 
@@ -839,6 +872,14 @@ class Animation(object):
         self.delay = 0
 
         pg.clock.schedule_interval(self.update, 1e-12)
+
+        # Clear out temp directory initially
+        try:
+            if os.path.isdir(dotslash + "temp"):
+                shutil.rmtree(dotslash + "temp")
+            os.makedirs(dotslash + "temp")
+        except:
+            raise PermissionError
 
         pg.app.run()
         pg.app.exit()
