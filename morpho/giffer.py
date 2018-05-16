@@ -21,21 +21,24 @@ duration  = Duration of each frame in seconds.
             Defaults to 0.1 seconds.
 '''
 dotslash = os.curdir + os.sep
-def makegif(filenames="*", directory=dotslash, saveas="./movie.gif", duration=0.1):
+def makegif(filenames="*", directory=dotslash, saveas=dotslash+"movie.gif", \
+    duration=0.1):
     if filenames == "*": filenames = os.listdir(directory)
     with imageio.get_writer(saveas, mode='I', duration=duration) as writer:
         for filename in filenames:
-            image = imageio.imread(directory + "/" + filename)
+            image = imageio.imread(directory + os.sep + filename)
             writer.append_data(image)
 
 # Optimizes a gif file in place using gifsicle.
 # Requires the gifsicle executable to be in the current directory.
 def optimizegif(filename):
+    if not os.path.isfile(filename):
+        raise FileNotFoundError
     if platform.system() == "Windows":
-        cmd = ".\\gifsicle.exe -b -O3 --careful " + filename
+        cmd = '.\\gifsicle.exe -b -O3 --careful "' + filename + '"'
         sp.call(cmd, creationflags=CREATE_NO_WINDOW)
     else:
-        cmd = os.curdir + os.sep + "gifsicle -b O3 --careful " + filename
+        cmd = os.curdir + os.sep + 'gifsicle -b O3 --careful "' + filename + '"'
         sp.call(cmd, creationflags=CREATE_NO_WINDOW)
 
 # def makegif(filenames, directory="./", saveas="./movie.gif", duration=0.1):
