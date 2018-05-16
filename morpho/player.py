@@ -6,7 +6,7 @@ def main():
         win = gui.RootWindow(gui.defaultSettings)
         win.root.withdraw()
         try:
-            win.load("./lastplay.mrm")
+            win.load(gui.dotslash+"lastplay.mrm")
         except:
             dialog.showerror(
                 "Load Error",
