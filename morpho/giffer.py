@@ -19,10 +19,19 @@ duration  = Duration of each frame in seconds.
             Can be a single number to apply to all frames,
             or a list denoting the duration of each filename.
             Defaults to 0.1 seconds.
+            Maximum: 655 seconds. If any duration exceeds this value,
+            it will be lowered to the maximum.
 '''
 dotslash = os.curdir + os.sep
 def makegif(filenames="*", directory=dotslash, saveas=dotslash+"movie.gif", \
     duration=0.1):
+    # Lower overflows
+    if type(duration) is int or type(duration) is float:
+        duration = min(duration, 655)
+    else:
+        for i in range(len(duration)):
+            duration[i] = min(duration[i], 655)
+
     if filenames == "*": filenames = os.listdir(directory)
     with imageio.get_writer(saveas, mode='I', duration=duration) as writer:
         for filename in filenames:
