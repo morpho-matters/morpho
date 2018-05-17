@@ -782,6 +782,7 @@ class Animation(object):
             raise Exception("len(frameCount) != len(keyframes)-1")
 
         if self.window == None: self.setupWindow()
+        self.window.set_visible(False)
 
         self.active = True
         self.window.switch_to()  # Focus on this window for rendering.
@@ -821,7 +822,7 @@ class Animation(object):
 
             # Save current frame as a numbered PNG image.
             imgfile = dotslash+"temp"+os.sep + int2fixedstr(mation.currentFrame, \
-                digits=1+int(math.log10(max(1,sum(mation.frameCount))))) + ".png"
+                digits=numdigits(1+sum(mation.frameCount))) + ".png"
             try:
                 pyglet.image.get_buffer_manager().get_color_buffer().save(imgfile)
             except:
@@ -1081,6 +1082,16 @@ def flattenList(a):
 def int2fixedstr(n, digits=3):
     str_n = str(n)
     return "0"*(digits-len(str_n)) + str_n
+
+# Returns number of digits required to represent the integer
+# in the given base (default=10)
+def numdigits(n, base=10):
+    n = abs(int(n))
+    d = 0
+    while n > 0:
+        n = n // base
+        d += 1
+    return max(1,d)
 
 # Computes the correct amount to shift an angle th1 so that it
 # becomes th2 in the shortest possible path
