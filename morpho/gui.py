@@ -49,6 +49,10 @@ dotslash = os.curdir + os.sep
 # as a standalone using pyinstaller.
 exportMode = False
 
+# Set this to True if you're debugging the player so that
+# errors get written to the console.
+runLocal = False
+
 # Special exception gets raised if user attempts to load an
 # invalid animation file.
 class VersionError(Exception):
@@ -588,7 +592,9 @@ class RootWindow(object):
         directory and then calls a separate instance
         of itself to read it in and play the animation.
         '''
-        # self._run(); return  # Uncomment if debugging the _run() method.
+        if runLocal:
+            self._run()
+            return
 
         if not self.sanityCheck(): return
 
@@ -754,7 +760,8 @@ class RootWindow(object):
             except eng.GifError:
                 dialog.showerror(
                     "GIF Error",
-                    "Morpho couldn't properly assemble all of the frames together into a GIF. The resulting GIF (if it was created) may be flawed.")
+                    "Morpho couldn't properly assemble all of the frames together into a GIF. The resulting GIF (if it was created) may be flawed."
+                    )
             except:  # Unknown error
                 dialog.showerror(
                     "Unknown Error",
@@ -967,7 +974,11 @@ class RootWindow(object):
                     return
 
                 # Execute the player
-                callPlayer()
+                if runLocal:
+                    self.exportFilename = filename
+                    self._run()
+                else:
+                    callPlayer()
 
             else:
                 # Try to save the file
