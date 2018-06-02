@@ -40,7 +40,7 @@ from morpho.functions import *
 
 # Detects infs and nans (real or complex)
 isbadnum = eng.isbadnum
-# Code tells sp.call() not to make a console window
+# Code tells sp.call() not to make a console window (for Windows)
 CREATE_NO_WINDOW = 0x08000000
 # Current directory in this system
 dotslash = os.curdir + os.sep
@@ -1625,8 +1625,9 @@ def str2floatTuple(st):
     return tuple(float(item.strip()) \
         for item in st.replace("(", "").replace(")", "").split(","))
 
-# Calls either the player script or external executable
-# which will play the animation separate from the main GUI.
+# Calls a separate instance of Morpho to play the animation.
+# This will either call the python script "launch_morpho.py"
+# or call the "Morpho" executable depending on exportMode.
 def callPlayer():
     # exportMode should be set to True at the beginning of this file
     # if you're about to export Morpho as a standalone.
@@ -1634,11 +1635,14 @@ def callPlayer():
     # be set to False.
     if exportMode:
         if platform.system() == "Windows":
-            sp.call("player.exe", creationflags=CREATE_NO_WINDOW)
+            sp.call('.\\Morpho.exe .\\lastplay.mrm', creationflags=CREATE_NO_WINDOW)
         else:
-            sp.call(dotslash + "player", creationflags=CREATE_NO_WINDOW)
+            sp.call(dotslash + 'Morpho.app ' + dotslash + 'lastplay.mrm', shell=True)
     else:
-        sp.call("python player.py", creationflags=CREATE_NO_WINDOW)
+        if platform.system() == "Windows":
+            sp.call('python .\\launch_morpho.py .\\lastplay.mrm', creationflags=CREATE_NO_WINDOW)
+        else:
+            sp.call('python3 '+dotslash+'launch_morpho.py '+dotslash+'lastplay.mrm', shell=True)
 
 # Default special settings for the GUI
 defaultSettings = {
