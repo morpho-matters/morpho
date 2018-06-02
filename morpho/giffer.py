@@ -2,12 +2,8 @@ import imageio
 import os, platform
 import subprocess as sp
 
-# Code tells sp.call() not to make a console window
+# Code tells sp.call() not to make a console window (for Windows)
 CREATE_NO_WINDOW = 0x08000000
-
-# ALERT:
-# os.sep?
-# os.curdir?
 
 '''
 Compiles the set of image files into an animated gif.
@@ -49,14 +45,3 @@ def optimizegif(filename):
     else:
         cmd = os.curdir + os.sep + 'gifsicle -b O3 --careful "' + filename + '"'
         sp.call(cmd, creationflags=CREATE_NO_WINDOW)
-
-# def makegif(filenames, directory="./", saveas="./movie.gif", duration=0.1):
-#     images = []
-#     for filename in filenames:
-#         images.append(imageio.imread(directory + "/" + filename))
-#     imageio.mimsave(saveas, images)
-
-
-# filenames = os.listdir("./export")
-
-# makegif(filenames, "./export", duration=1/30)
