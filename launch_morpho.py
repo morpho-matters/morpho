@@ -2,7 +2,7 @@ from tkinter import messagebox as dialog
 import morpho.gui as gui
 import sys
 
-def runMRM(filename=gui.dotslash+"lastplay.mrm"):
+def runMRM(filename=gui.dotslash+"lastplay.mrm", exportFilename=""):
     try:
         state = gui.GUIstate()
         try:
@@ -14,16 +14,18 @@ def runMRM(filename=gui.dotslash+"lastplay.mrm"):
                 )
             return
 
-        if state.exportFilename == "":
+        if exportFilename == "":
             state.run()
         else:
-            state.export()
+            state.export(exportFilename)
     except:
         gui.showStandardError()
         raise
 
 # If an MRM filename is passed to the script, run it!
-if len(sys.argv) > 1:
-    runMRM(sys.argv[-1])
+if len(sys.argv) == 2:
+    runMRM(sys.argv[1])
+elif len(sys.argv) == 3: # Two filenames means export MRM to GIF
+    runMRM(sys.argv[1], sys.argv[2])
 else:  # Normal startup
     gui.startGUI()
