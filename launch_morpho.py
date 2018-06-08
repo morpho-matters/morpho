@@ -4,17 +4,20 @@ import sys
 
 def runMRM(filename=gui.dotslash+"lastplay.mrm"):
     try:
-        win = gui.RootWindow(gui.defaultSettings)
-        win.root.withdraw()
+        state = gui.GUIstate()
         try:
-            win.load(filename)
+            state.load(filename)
         except:
             dialog.showerror(
                 "Load Error",
                 "Morpho can't access lastplay.mrm in its own directory. This is necessary in order to play the animation."
                 )
             return
-        win._run()
+
+        if state.exportFilename == "":
+            state.run()
+        else:
+            state.export()
     except:
         gui.showStandardError()
         raise
