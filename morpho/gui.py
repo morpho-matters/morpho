@@ -32,7 +32,7 @@ version = 1.02
 # an updated version of Morpho can't be played by older versions.
 # This is done since some updates won't affect whether or not
 # an animation file can be played (e.g. efficiency improvements)
-fileVersion = 1.01
+fileVersion = 1.02
 
 # Loading directly into namespace gives users access to
 # complex sin, cos, etc. when applying functions
@@ -723,7 +723,21 @@ class RootWindow(object):
 
         # Stringify all the data and prepare it to be written
         preamble = "Morpho animation file"
-        content = preamble + "\n\n"+str(fileVersion)+"\n\n"
+
+        # Find domain frame!
+        # Decide what version to save as. If Blue-Green grid is used,
+        # must save as latest file version.
+        for frm in self.frames:
+            if frm.type == "domain": break
+        if frm.grid in ["Standard", "Zeta"]:
+            # Yay! We're backwards compatible with 1.01!
+            version = 1.01
+        else:
+            # Worst case. Use latest version.
+            version = fileVersion
+
+        # Write content
+        content = preamble + "\n\n"+str(version)+"\n\n"
         for key in state:
             content += key + " : " + str(state[key]) + "\n"
         content += "\n"
@@ -871,9 +885,9 @@ class EditDomainWindow(object):
 
         self.gridOpts = tk.StringVar(master=self.root, value=frame.grid)
         self.gridMenu = tk.OptionMenu(
-            gridFrame1, self.gridOpts, "Standard", "Zeta"
+            gridFrame1, self.gridOpts, "Standard", "Blue-Green", "Zeta"
             )
-        self.gridMenu.config(width=7)
+        self.gridMenu.config(width=10)
         self.gridMenu.grid(sticky="w", padx=5, row=0, column=1)
 
         gridFrame2 = tk.Frame(mainFrame)
@@ -1464,7 +1478,22 @@ class GUIstate(object):
         for frm in self.frames:
             if frm.type == "domain": break
 
-        if frm.grid == "Standard":
+        if frm.grid == "Zeta":
+            # Resolution is taken to be the maximum supplied res
+            # amongst horizontal and vertical
+            domFrame = eng.zetaGrid(max(frm.horzRes, frm.vertRes))
+        elif frm.grid == "Blue-Green":
+            domFrame = eng.standardGrid(
+                view=mation.view,
+                nhorz=frm.nhorz, nvert=frm.nvert,
+                hres=frm.horzRes, vres=frm.vertRes,
+                hmidlines=frm.horzMidlines,
+                vmidlines=frm.vertMidlines,
+                hcolor=eng.rgbNormalize(0x23, 0xb5, 0x83),
+                hmid=eng.rgbNormalize(0x82, 0xe1, 0xc0),
+                BGgrid=frm.BGgrid, axes=frm.axes,
+                delay=frm.delay*frameRate)
+        else:  # Default to Standard grid
             domFrame = eng.standardGrid(
                 view=mation.view,
                 nhorz=frm.nhorz, nvert=frm.nvert,
@@ -1473,10 +1502,6 @@ class GUIstate(object):
                 vmidlines=frm.vertMidlines,
                 BGgrid=frm.BGgrid, axes=frm.axes,
                 delay=frm.delay*frameRate)
-        else:
-            # Resolution is taken to be the maximum supplied res
-            # amongst horizontal and vertical
-            domFrame = eng.zetaGrid(max(frm.horzRes, frm.vertRes))
 
         domFrame.id = 0
         domFrame.optimizePaths()
