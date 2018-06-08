@@ -77,7 +77,6 @@ class RootWindow(object):
             self.settings = getSettings()
         else:
             self.settings = settings
-        self.exportFilename = ""
 
         # Hidden variables
         self.frames = [self.domain]  # Framedata objects
@@ -668,7 +667,6 @@ class RootWindow(object):
         state = GUIstate()
         state.load(filename)
 
-        self.exportFilename = state.exportFilename
         self.frames = state.frames
 
         # # Update the nextID parameter to be greater than all the
@@ -693,7 +691,7 @@ class RootWindow(object):
     # Saves the GUI state into the given filename.
     # This function will give no warning about overwriting a file!
     # Returns True if save was successful. Else False.
-    def save(self, filename, exportFilename=""):
+    def save(self, filename):
         # sanityCheck widget inputs
         if not self.sanityCheck(): return
 
@@ -724,10 +722,7 @@ class RootWindow(object):
         }
 
         # Stringify all the data and prepare it to be written
-        if exportFilename == "":
-            preamble = "Morpho animation file"
-        else:
-            preamble = "Morpho animation file export filename:"+exportFilename
+        preamble = "Morpho animation file"
         content = preamble + "\n\n"+str(fileVersion)+"\n\n"
         for key in state:
             content += key + " : " + str(state[key]) + "\n"
@@ -758,9 +753,9 @@ class RootWindow(object):
 
             # Handle GIF export case
             if filename[-4:].lower() == ".gif":
-                # Save MRM in export mode to lastplay.mrm
+                # Save MRM to lastplay.mrm
                 try:
-                    self.save(dotslash+"lastplay.mrm", exportFilename=filename)
+                    self.save(dotslash+"lastplay.mrm")
                 except PermissionError:
                     dialog.showerror(
                         "File permission error",
@@ -774,12 +769,13 @@ class RootWindow(object):
                         )
                     return
 
-                # Execute the player
+                # Execute the player in export mode
                 if runLocal:
-                    self.exportFilename = filename
-                    self._run()
+                    state = GUIstate()
+                    state.load(dotslash + "lastplay.mrm")
+                    state.export(filename)
                 else:
-                    callPlayer()
+                    callPlayer(exportFilename=filename)
 
             else:
                 # Try to save the file
@@ -1345,8 +1341,6 @@ class ApplyWindow(object):
 class GUIstate(object):
 
     def __init__(self, **kwargs):
-        self.exportFilename = ""
-
         for kw in kwargs:
             setattr(self, kw, kwargs[kw])
 
@@ -1358,10 +1352,7 @@ class GUIstate(object):
         with open(filename, "r") as file:
             sections = file.read().strip().split("\n\n")
         preamble = sections[0]
-        if "Morpho animation file export filename:" in preamble:
-            # Extract actual GIF filename to create
-            self.exportFilename = preamble[38:]
-        elif preamble != "Morpho animation file":
+        if preamble != "Morpho animation file":
             raise FileFormatError("Invalid morpho animation file")
         try:
             loadedVersion = float(sections[1])
@@ -1550,8 +1541,8 @@ class GUIstate(object):
             mation.frameCount.append(
                 max(2, round(visibleFrames[n].tweenDuration*frameRate)))
 
-        # Prerender if necessary (never prerender if exporting GIF)
-        if prerender and self.exportFilename == "":
+        # Prerender if necessary
+        if prerender:
             mation.prerender()
 
         return mation
@@ -1563,12 +1554,16 @@ class GUIstate(object):
         mation.run()
 
     # Create and export the animation described by the GUIstate.
-    def export(self):
+    def export(self, exportFilename):
+        # If exporting, never prerender
+        prerender = self.prerender
+        self.prerender = False
         mation = self.makeAnimation()
+        self.prerender = prerender
 
-        if self.exportFilename[-4:].lower() == ".gif":
+        if exportFilename[-4:].lower() == ".gif":
             try:
-                mation.export(self.exportFilename)
+                mation.export(exportFilename)
             except PermissionError:  # Temp folder clean up failed.
                 dialog.showerror(
                     "Clean up Error",
@@ -1590,7 +1585,7 @@ class GUIstate(object):
                     "An error occurred when exporting this animation. The resulting GIF (if it was created) may be flawed."
                     )
         else:
-            raise FileFormatError("Unknown export format")
+            raise FileFormatError("Unknown export file format")
 
 
 # Creates a standard domain framedata object.
@@ -1681,21 +1676,39 @@ def str2floatTuple(st):
 # Calls a separate instance of Morpho to play the animation.
 # This will either call the python script "launch_morpho.py"
 # or call the "Morpho" executable depending on exportMode.
-def callPlayer():
+# Optional arg "exportFilename" tells callPlayer() to export
+# lastplay.mrm as the filename passed in.
+# WARNING: callPlayer() will NOT check the supplied exportFilename
+# to make sure it's sanitary. Do that BEFORE calling callPlayer
+# with an exportFilename argument!
+def callPlayer(exportFilename=""):
     # exportMode should be set to True at the beginning of this file
     # if you're about to export Morpho as a standalone.
     # If you're just trying to run the script, exportMode should
     # be set to False.
+
+    # Build command step by step
+    cmd = ""
+
     if exportMode:
         if platform.system() == "Windows":
-            sp.call('.\\Morpho.exe .\\lastplay.mrm', creationflags=CREATE_NO_WINDOW)
+            cmd += ".\\Morpho.exe .\\lastplay.mrm"
         else:
-            sp.call(dotslash + 'Morpho.app ' + dotslash + 'lastplay.mrm', shell=True)
+            cmd += dotslash + "Morpho.app " + dotslash + "lastplay.mrm"
     else:
         if platform.system() == "Windows":
-            sp.call('python .\\launch_morpho.py .\\lastplay.mrm', creationflags=CREATE_NO_WINDOW)
+            cmd += "python .\\launch_morpho.py .\\lastplay.mrm"
         else:
-            sp.call('python3 '+dotslash+'launch_morpho.py '+dotslash+'lastplay.mrm', shell=True)
+            cmd += "python3 "+dotslash+"launch_morpho.py "+dotslash+"lastplay.mrm"
+
+    # Append export filename if provided.
+    if exportFilename != "":
+        cmd += ' "' + exportFilename + '"'
+
+    if platform.system() == "Windows":
+        sp.call(cmd, shell=True, creationflags=CREATE_NO_WINDOW)
+    else:
+        sp.call(cmd, shell=True)
 
 # Default special settings for the GUI
 defaultSettings = {
