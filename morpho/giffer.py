@@ -36,12 +36,14 @@ def makegif(filenames="*", directory=dotslash, saveas=dotslash+"movie.gif", \
 
 # Optimizes a gif file in place using gifsicle.
 # Requires the gifsicle executable to be in the current directory.
+# WARNING: Does NOT check that filename arg is sanitized.
+# Check yourself before using it!
 def optimizegif(filename):
     if not os.path.isfile(filename):
         raise FileNotFoundError
     if platform.system() == "Windows":
         cmd = '.\\gifsicle.exe -b -O3 --careful "' + filename + '"'
-        sp.call(cmd, creationflags=CREATE_NO_WINDOW)
+        sp.call(cmd, shell=True, creationflags=CREATE_NO_WINDOW)
     else:
         cmd = os.curdir + os.sep + 'gifsicle -b O3 --careful "' + filename + '"'
-        sp.call(cmd, creationflags=CREATE_NO_WINDOW)
+        sp.call(cmd, shell=True)
