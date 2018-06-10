@@ -1713,27 +1713,32 @@ def callPlayer(exportFilename=""):
     # be set to False.
 
     # Build command step by step
-    cmd = ""
+    cmd = []
 
     if exportMode:
         if platform.system() == "Windows":
-            cmd += ".\\Morpho.exe .\\lastplay.mrm"
+            # cmd += ".\\Morpho.exe .\\lastplay.mrm"
+            cmd.extend([".\\Morpho.exe", ".\\lastplay.mrm"])
         else:
-            cmd += dotslash + "Morpho.app " + dotslash + "lastplay.mrm"
+            # cmd += dotslash + "Morpho.app " + dotslash + "lastplay.mrm"
+            cmd.extend([dotslash+"Morpho.app", dotslash+"lastplay.mrm"])
     else:
         if platform.system() == "Windows":
-            cmd += "python .\\launch_morpho.py .\\lastplay.mrm"
+            # cmd += "python .\\launch_morpho.py .\\lastplay.mrm"
+            cmd.extend(["python", ".\\launch_morpho.py", ".\\lastplay.mrm"])
         else:
-            cmd += "python3 "+dotslash+"launch_morpho.py "+dotslash+"lastplay.mrm"
+            # cmd += "python3 "+dotslash+"launch_morpho.py "+dotslash+"lastplay.mrm"
+            cmd.extend(["python3", dotslash+"launch_morpho.py", dotslash+"lastplay.mrm"])
 
     # Append export filename if provided.
     if exportFilename != "":
-        cmd += ' "' + exportFilename + '"'
+        # cmd += ' "' + exportFilename + '"'
+        cmd.append(exportFilename)
 
     if platform.system() == "Windows":
-        sp.call(cmd, shell=True, creationflags=CREATE_NO_WINDOW)
+        sp.call(cmd, creationflags=CREATE_NO_WINDOW)
     else:
-        sp.call(cmd, shell=True)
+        sp.call(cmd)
 
 # Default special settings for the GUI
 defaultSettings = {
