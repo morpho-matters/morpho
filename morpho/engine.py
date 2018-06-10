@@ -782,7 +782,6 @@ class Animation(object):
             raise Exception("len(frameCount) != len(keyframes)-1")
 
         if self.window == None: self.setupWindow()
-        self.window.set_visible(False)
 
         self.active = True
         self.window.switch_to()  # Focus on this window for rendering.
@@ -791,6 +790,7 @@ class Animation(object):
         # It is equal to 1/frameRate unless there's a keyframe delay.
         gifDelays = [1.0/self.frameRate]*(1+sum(self.frameCount))
         def update(dt, mation=self):
+            self.window.set_visible(False)
             animationEnd = False
             # Reached end of animation. Render final keyframe.
             if mation.currentFrame >= sum(mation.frameCount):
