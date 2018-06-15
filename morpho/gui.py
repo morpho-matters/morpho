@@ -26,13 +26,13 @@ import morpho.engine as eng
 import morpho.whitelist as wh
 
 # Current Morpho version
-version = 1.02
+version = 1.1
 
 # fileVersion should only be changed when animations saved with
 # an updated version of Morpho can't be played by older versions.
 # This is done since some updates won't affect whether or not
 # an animation file can be played (e.g. efficiency improvements)
-fileVersion = 1.02
+fileVersion = 1.01
 
 # Loading directly into namespace gives users access to
 # complex sin, cos, etc. when applying functions
@@ -723,21 +723,7 @@ class RootWindow(object):
 
         # Stringify all the data and prepare it to be written
         preamble = "Morpho animation file"
-
-        # Find domain frame!
-        # Decide what version to save as. If Blue-Green grid is used,
-        # must save as latest file version.
-        for frm in self.frames:
-            if frm.type == "domain": break
-        if frm.grid in ["Standard", "Zeta"]:
-            # Yay! We're backwards compatible with 1.01!
-            version = 1.01
-        else:
-            # Worst case. Use latest version.
-            version = fileVersion
-
-        # Write content
-        content = preamble + "\n\n"+str(version)+"\n\n"
+        content = preamble + "\n\n"+str(fileVersion)+"\n\n"
         for key in state:
             content += key + " : " + str(state[key]) + "\n"
         content += "\n"
@@ -885,30 +871,42 @@ class EditDomainWindow(object):
 
         self.gridOpts = tk.StringVar(master=self.root, value=frame.grid)
         self.gridMenu = tk.OptionMenu(
-            gridFrame1, self.gridOpts, "Standard", "Blue-Green", "Zeta"
+            gridFrame1, self.gridOpts, "Standard", "Zeta"
             )
-        self.gridMenu.config(width=10)
+        self.gridMenu.config(width=7)
         self.gridMenu.grid(sticky="w", padx=5, row=0, column=1)
 
         gridFrame2 = tk.Frame(mainFrame)
         gridFrame2.grid(sticky="w", padx=10, pady=5, row=1)
+
+        tk.Label(master=gridFrame2, text="Number") \
+            .grid(sticky="we", padx=5, row=0, column=1)
+
+        tk.Label(master=gridFrame2, text="Resolution") \
+            .grid(sticky="we", padx=5, row=0, column=3)
+
+        tk.Label(master=gridFrame2, text="Color") \
+            .grid(sticky="we", padx=5, row=0, column=4)
 
         tk.Label(master=gridFrame2, text="Horizontal Lines:") \
             .grid(sticky="w", padx=5, row=1, column=0)
 
         self.nhorz = tk.StringVar(self.root, value=str(frame.nhorz))
         tk.Entry(master=gridFrame2, width=5, textvariable=self.nhorz) \
-            .grid(sticky="w", padx=5, row=1, column=1)
+            .grid(sticky="we", padx=5, row=1, column=1)
 
         # Separater frame
         tk.Frame(gridFrame2).grid(padx=5, row=1, column=2)
 
-        tk.Label(master=gridFrame2, text="Resolution:") \
-            .grid(sticky="w", padx=5, row=1, column=3)
-
         self.horzRes = tk.StringVar(self.root, value=fl2str(frame.horzRes))
         tk.Entry(master=gridFrame2, width=3, textvariable=self.horzRes) \
-            .grid(sticky="w", padx=5, row=1, column=4)
+            .grid(sticky="we", padx=5, row=1, column=3)
+
+
+        self.horzColor = tk.StringVar(self.root, value=frame.hcolor)
+        ttk.Combobox(master=gridFrame2, values=colors,
+            textvariable=self.horzColor, width=8) \
+            .grid(sticky="we", padx=5, row=1, column=4)
 
         self.horzMidlines = tk.IntVar(self.root, value=int(frame.horzMidlines))
         tk.Checkbutton(master=gridFrame2,
@@ -922,17 +920,19 @@ class EditDomainWindow(object):
 
         self.nvert = tk.StringVar(self.root, value=str(frame.nvert))
         tk.Entry(master=gridFrame2, width=5, textvariable=self.nvert) \
-            .grid(sticky="w", padx=5, row=2, column=1)
+            .grid(sticky="we", padx=5, row=2, column=1)
 
         # Separater frame
         tk.Frame(gridFrame2).grid(padx=5, row=2, column=2)
 
-        tk.Label(master=gridFrame2, text="Resolution:") \
-            .grid(sticky="w", padx=5, row=2, column=3)
-
         self.vertRes = tk.StringVar(self.root, value=fl2str(frame.vertRes))
         tk.Entry(master=gridFrame2, width=3, textvariable=self.vertRes) \
-            .grid(sticky="w", padx=5, row=2, column=4)
+            .grid(sticky="we", padx=5, row=2, column=3)
+
+        self.vertColor = tk.StringVar(self.root, value=frame.vcolor)
+        ttk.Combobox(master=gridFrame2, values=colors,
+            textvariable=self.vertColor, width=8) \
+            .grid(sticky="we", padx=5, row=2, column=4)
 
         self.vertMidlines = tk.IntVar(self.root, value=int(frame.vertMidlines))
         tk.Checkbutton(master=gridFrame2,
@@ -1009,9 +1009,11 @@ class EditDomainWindow(object):
         self.frame.grid = self.gridOpts.get()
         self.frame.nhorz = int(self.nhorz.get())
         self.frame.horzRes = float(self.horzRes.get())
+        self.frame.hcolor = self.horzColor.get().strip().lower()
         self.frame.horzMidlines = bool(self.horzMidlines.get())
         self.frame.nvert = int(self.nvert.get())
         self.frame.vertRes = float(self.vertRes.get())
+        self.frame.vcolor = self.vertColor.get().strip().lower()
         self.frame.vertMidlines = bool(self.vertMidlines.get())
         self.frame.axes = bool(self.axes.get())
         self.frame.BGgrid = bool(self.BGgrid.get())
@@ -1036,8 +1038,10 @@ class EditDomainWindow(object):
         try:
             nhorz = int(self.nhorz.get())
             horzRes = float(self.horzRes.get())
+            hcolor = self.horzColor.get().strip().lower()
             nvert = int(self.nvert.get())
             vertRes = float(self.vertRes.get())
+            vcolor = self.vertColor.get().strip().lower()
             tweenDuration = float(self.tweenDuration.get())
             delay = float(self.delay.get())
         except ValueError:
@@ -1061,6 +1065,13 @@ class EditDomainWindow(object):
                 dialog.showerror(
                     "Resolution error",
                     "Resolution values must be positive real numbers.")
+            return False
+        if not((hcolor in colormap or validHexColor(hcolor)) and \
+            (vcolor in colormap or validHexColor(vcolor))):
+            if showerror:
+                dialog.showerror(
+                    "Color error",
+                    "Horizontal or Vertical color not recognized.")
             return False
         if isbadnum(tweenDuration) or tweenDuration < 0:
             if showerror:
@@ -1339,17 +1350,72 @@ class ApplyWindow(object):
 
         return True
 
-# # Not used (yet)
-# colormap = {
-#     "black": (0,0,0),
-#     "white": (1,1,1),
-#     "red": (1,0,0),
-#     "green": (0,1,0),
-#     "blue": (0,0,1),
-#     "yellow": (1,1,0),
-#     "magenta": (1,0,1),
-#     "cyan": (0,1,1)
-# }
+### COLOR FUNCTION/DATA ###
+
+# Checks that a string codes to a valid hex color
+# That is, consists only of the characters "0" thru "f"
+def validHexColor(string):
+    string = string.lower()
+    for char in string:
+        if char not in "0123456789abcdef":
+            return False
+    return True
+
+# Parses a hex color string into an RGB triple (0-255, 0-255, 0-255)
+def parseHexColor(string):
+    if not validHexColor(string):
+        raise ValueError("Not a valid hex string!")
+    N = int(string, 16)
+    B = N % 256
+
+    N = N // 256
+    G = N % 256
+
+    N = N // 256
+    R = N % 256
+
+    return (R,G,B)
+
+# Takes a color string (whether named or hex) and returns
+# the normalized RGB triple (0-1, 0-1, 0-1)
+def colorStr2Tuple(string):
+    string = string.strip().lower()
+    if string in colormap:
+        return colormap[string]
+    else:
+        return eng.rgbNormalize(parseHexColor(string))
+
+# Dict of named colors
+colormap = {
+    "black": (0,0,0),
+    "white": (1,1,1),
+    "red": (1,0,0),
+    "green": eng.rgbNormalize(0x23, 0xb5, 0x83),
+    "blue": (0,0,1),
+    "yellow": (1,1,0),
+    "magenta": (1,0,1),
+    "cyan": (0,1,1),
+    "orange": eng.rgbNormalize(0xff, 0xa5, 0),
+    "violet": eng.rgbNormalize(parseHexColor("800080")),
+    "brown": eng.rgbNormalize(0x80, 0x40, 0)
+}
+
+# List of the colors in proper order.
+# For use in constructing the combobox ONLY!
+# colormap should be used for programming purposes.
+colors = ["red", "green", "blue", "yellow", "cyan", "magenta",
+    "orange", "violet", "brown", "white", "black"]
+
+# Transparently overlays the color A over the color B
+# using transparency alpha (default=0.5)
+def alphaOverlay(A, B, alpha=0.5):
+    if type(A) is list or type(A) is tuple:
+        result = [0,0,0]
+        for i in range(len(A)):
+            result[i] = alphaOverlay(A[i], B[i], alpha)
+        return tuple(result)
+    else:
+        return A*alpha + B*(1-alpha)
 
 # Encapsulates the state of the Morpho GUI.
 class GUIstate(object):
@@ -1448,7 +1514,7 @@ class GUIstate(object):
                 "Invalid functions",
                 "This animation can't be played since some of the function formulas are invalid."
                 )
-            return
+            return None
         # If you made it here, then all the function formulas should be safe.
 
         # Convert into proper datatypes
@@ -1482,26 +1548,24 @@ class GUIstate(object):
             # Resolution is taken to be the maximum supplied res
             # amongst horizontal and vertical
             domFrame = eng.zetaGrid(max(frm.horzRes, frm.vertRes))
-        elif frm.grid == "Blue-Green":
-            domFrame = eng.standardGrid(
-                view=mation.view,
-                nhorz=frm.nhorz, nvert=frm.nvert,
-                hres=frm.horzRes, vres=frm.vertRes,
-                hmidlines=frm.horzMidlines,
-                vmidlines=frm.vertMidlines,
-                hcolor=eng.rgbNormalize(0x23, 0xb5, 0x83),
-                hmid=eng.rgbNormalize(0x82, 0xe1, 0xc0),
-                BGgrid=frm.BGgrid, axes=frm.axes,
-                delay=frm.delay*frameRate)
         else:  # Default to Standard grid
+            # Parse color strings into tuples and
+            # compute midline colors
+            hcolor=colorStr2Tuple(frm.hcolor)
+            vcolor=colorStr2Tuple(frm.vcolor)
+            hmidColor = alphaOverlay((1,1,1), hcolor, alpha=0.5)
+            vmidColor = alphaOverlay((1,1,1), vcolor, alpha=0.5)
             domFrame = eng.standardGrid(
                 view=mation.view,
                 nhorz=frm.nhorz, nvert=frm.nvert,
                 hres=frm.horzRes, vres=frm.vertRes,
+                hcolor=hcolor, vcolor=vcolor,
+                hmidColor=hmidColor, vmidColor=vmidColor,
                 hmidlines=frm.horzMidlines,
                 vmidlines=frm.vertMidlines,
                 BGgrid=frm.BGgrid, axes=frm.axes,
-                delay=frm.delay*frameRate)
+                delay=frm.delay*frameRate
+                )
 
         domFrame.id = 0
         domFrame.optimizePaths()
@@ -1628,6 +1692,8 @@ class DomainFrame(object):
         self.nvert = 11
         self.horzRes = 1
         self.vertRes = 1
+        self.hcolor = "blue"
+        self.vcolor = "blue"
         self.horzMidlines = True
         self.vertMidlines = True
         self.axes = True
