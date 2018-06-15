@@ -3,7 +3,6 @@ import morpho.gui as gui
 import sys
 
 pwd = gui.pwd
-print(pwd)
 
 def runMRM(filename=pwd+"lastplay.mrm", exportFilename=""):
     try:
