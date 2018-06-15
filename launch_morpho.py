@@ -1,10 +1,10 @@
 from tkinter import messagebox as dialog
 import morpho.gui as gui
-import sys
+import os, sys
 
 pwd = gui.pwd
 
-def runMRM(filename=pwd+"lastplay.mrm", exportFilename=""):
+def runMRM(filename=pwd+"resources"+os.sep+"lastplay.mrm", exportFilename=""):
     try:
         state = gui.GUIstate()
         try:
