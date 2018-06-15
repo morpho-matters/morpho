@@ -1786,7 +1786,7 @@ def callPlayer(exportFilename=""):
             # cmd += ".\\Morpho.exe .\\lastplay.mrm"
             cmd.extend([".\\Morpho.exe", ".\\lastplay.mrm"])
         else:
-            cmd.extend([pwd+"Morpho", pwd+"lastplay.mrm"])
+            cmd.extend([pwd+"launch_morpho", pwd+"lastplay.mrm"])
     else:
         if platform.system() == "Windows":
             cmd.extend(["python", ".\\launch_morpho.py", ".\\lastplay.mrm"])
