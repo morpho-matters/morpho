@@ -18,7 +18,7 @@ import tkinter as tk
 from tkinter import filedialog, ttk, messagebox
 dialog = messagebox  # I like the name "dialog" better
 
-import os
+import os, sys
 import subprocess as sp
 import platform
 
@@ -42,8 +42,8 @@ from morpho.functions import *
 isbadnum = eng.isbadnum
 # Code tells sp.call() not to make a console window (for Windows)
 CREATE_NO_WINDOW = 0x08000000
-# Current directory in this system
-dotslash = os.curdir + os.sep
+# Location of the Morpho directory.
+pwd = os.sep.join(sys.argv[0].split(os.sep)[:-1]) + os.sep
 
 # Set exportMode to True if you're going to export Morpho
 # as a standalone using pyinstaller.
@@ -595,7 +595,7 @@ class RootWindow(object):
         if not self.sanityCheck(): return
 
         try:
-            self.save(dotslash + "lastplay.mrm")
+            self.save(pwd + "lastplay.mrm")
         except PermissionError:
             dialog.showerror(
                 "File permission error",
@@ -611,7 +611,7 @@ class RootWindow(object):
 
         if runLocal:
             state = GUIstate()
-            state.load(dotslash + "lastplay.mrm")
+            state.load(pwd + "lastplay.mrm")
             state.run()
         else:
             callPlayer()
@@ -745,7 +745,7 @@ class RootWindow(object):
         # Ask the user (possibly repeatedly) where to save the file.
         while True:
             filename = filedialog.asksaveasfilename(
-                initialdir=dotslash+"animations", defaultextension="mrm",
+                initialdir=pwd+"animations", defaultextension="mrm",
                 filetypes=(("Morpho Animation", "*.mrm"), ("GIF animation", "*.gif"))
                 )
 
@@ -755,7 +755,7 @@ class RootWindow(object):
             if filename[-4:].lower() == ".gif":
                 # Save MRM to lastplay.mrm
                 try:
-                    self.save(dotslash+"lastplay.mrm")
+                    self.save(pwd+"lastplay.mrm")
                 except PermissionError:
                     dialog.showerror(
                         "File permission error",
@@ -772,7 +772,7 @@ class RootWindow(object):
                 # Execute the player in export mode
                 if runLocal:
                     state = GUIstate()
-                    state.load(dotslash + "lastplay.mrm")
+                    state.load(pwd + "lastplay.mrm")
                     state.export(filename)
                 else:
                     callPlayer(exportFilename=filename)
@@ -813,7 +813,7 @@ class RootWindow(object):
         # Ask the user (possibly repeatedly) for the file to open.
         while True:
             filename = filedialog.askopenfilename(
-                initialdir=dotslash+"animations", defaultextension="mrm",
+                initialdir=pwd+"animations", defaultextension="mrm",
                 filetypes=(("Morpho Animation", "*.mrm"), ("All Files", "*.*"))
                 )
 
@@ -1786,15 +1786,12 @@ def callPlayer(exportFilename=""):
             # cmd += ".\\Morpho.exe .\\lastplay.mrm"
             cmd.extend([".\\Morpho.exe", ".\\lastplay.mrm"])
         else:
-            # cmd += dotslash + "Morpho.app " + dotslash + "lastplay.mrm"
-            cmd.extend([dotslash+"Morpho.app", dotslash+"lastplay.mrm"])
+            cmd.extend([pwd+"Morpho", pwd+"lastplay.mrm"])
     else:
         if platform.system() == "Windows":
-            # cmd += "python .\\launch_morpho.py .\\lastplay.mrm"
             cmd.extend(["python", ".\\launch_morpho.py", ".\\lastplay.mrm"])
         else:
-            # cmd += "python3 "+dotslash+"launch_morpho.py "+dotslash+"lastplay.mrm"
-            cmd.extend(["python3", dotslash+"launch_morpho.py", dotslash+"lastplay.mrm"])
+            cmd.extend(["python3", pwd+"launch_morpho.py", pwd+"lastplay.mrm"])
 
     # Append export filename if provided.
     if exportFilename != "":
@@ -1812,7 +1809,7 @@ defaultSettings = {
 }
 
 # Read in special settings from file
-def getSettings(filename=dotslash+"settings.dat"):
+def getSettings(filename=pwd+"settings.dat"):
     try:
         with open(filename, "r") as file:
             raw = file.read()
@@ -1831,7 +1828,7 @@ def getSettings(filename=dotslash+"settings.dat"):
 
 # Save current special settings as a file
 # Returns True/False based on success/failure
-def saveSettings(settings, filename=dotslash+"settings.dat", showerror=True):
+def saveSettings(settings, filename=pwd+"settings.dat", showerror=True):
     # Stringify settings
     content = ""
     for key in settings:
@@ -1856,7 +1853,7 @@ def saveSettings(settings, filename=dotslash+"settings.dat", showerror=True):
 def startGUI():
     # If this is the first-time launch of Morpho, show off
     # the Power Sequence Animation
-    if not os.path.isfile(dotslash+"settings.dat"):
+    if not os.path.isfile(pwd+"settings.dat"):
         # Make this file so the next time Morpho is launched,
         # it doesn't show off.
         if not saveSettings(defaultSettings, showerror=False):
