@@ -822,7 +822,7 @@ class Animation(object):
                 frm.plot(mation.view, mation.window)
 
             # Save current frame as a numbered PNG image.
-            imgfile = pwd+"temp"+os.sep + int2fixedstr(mation.currentFrame, \
+            imgfile = pwd+"resources"+os.sep+"temp"+os.sep + int2fixedstr(mation.currentFrame, \
                 digits=numdigits(1+sum(mation.frameCount))) + ".png"
             try:
                 pyglet.image.get_buffer_manager().get_color_buffer().save(imgfile)
@@ -836,16 +836,16 @@ class Animation(object):
 
                 # Make the GIF!
                 try:
-                    giffer.makegif(directory=pwd+"temp", saveas=filename, duration=gifDelays)
+                    giffer.makegif(directory=pwd+"resources"+os.sep+"temp", saveas=filename, duration=gifDelays)
                     giffer.optimizegif(filename)
                 except:
                     raise GifError
 
                 # Clean up temp directory now that we're done
                 try:
-                    if os.path.isdir(pwd+"temp"):
-                        shutil.rmtree(pwd+"temp")
-                    os.makedirs(pwd+"temp")
+                    if os.path.isdir(pwd+"resources"+os.sep+"temp"):
+                        shutil.rmtree(pwd+"resources"+os.sep+"temp")
+                    os.makedirs(pwd+"resources"+os.sep+"temp")
                 except:
                     raise PermissionError
             else:
@@ -877,9 +877,9 @@ class Animation(object):
 
         # Clear out temp directory initially
         try:
-            if os.path.isdir(pwd + "temp"):
-                shutil.rmtree(pwd + "temp")
-            os.makedirs(pwd + "temp")
+            if os.path.isdir(pwd+"resources"+os.sep+"temp"):
+                shutil.rmtree(pwd+"resources"+os.sep+"temp")
+            os.makedirs(pwd+"resources"+os.sep+"temp")
         except:
             raise PermissionError
 
