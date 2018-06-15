@@ -42,10 +42,8 @@ def optimizegif(filename):
     if not os.path.isfile(filename):
         raise FileNotFoundError
     if platform.system() == "Windows":
-        cmd = [".\\gifsicle.exe", "-b", "-O3", "--careful", filename]
-        # cmd = '.\\gifsicle.exe -b -O3 --careful "' + filename + '"'
+        cmd = [".\\resources\\gifsicle.exe", "-b", "-O3", "--careful", filename]
         sp.call(cmd, creationflags=CREATE_NO_WINDOW)
     else:
-        # cmd = os.curdir + os.sep + 'gifsicle -b -O3 --careful "' + filename + '"'
-        cmd = [pwd+"gifsicle", "-b", "-O3", "--careful", filename]
+        cmd = [pwd+"resources"+os.sep+"gifsicle", "-b", "-O3", "--careful", filename]
         sp.call(cmd)
