@@ -1,5 +1,5 @@
 import imageio
-import os, platform
+import os, sys, platform
 import subprocess as sp
 
 # Code tells sp.call() not to make a console window (for Windows)
@@ -18,8 +18,8 @@ duration  = Duration of each frame in seconds.
             Maximum: 655 seconds. If any duration exceeds this value,
             it will be lowered to the maximum.
 '''
-dotslash = os.curdir + os.sep
-def makegif(filenames="*", directory=dotslash, saveas=dotslash+"movie.gif", \
+pwd = os.sep.join(sys.argv[0].split(os.sep)[:-1]) + os.sep
+def makegif(filenames="*", directory=pwd, saveas=pwd+"movie.gif", \
     duration=0.1):
     # Lower overflows
     if type(duration) is int or type(duration) is float:
@@ -47,5 +47,5 @@ def optimizegif(filename):
         sp.call(cmd, creationflags=CREATE_NO_WINDOW)
     else:
         # cmd = os.curdir + os.sep + 'gifsicle -b -O3 --careful "' + filename + '"'
-        cmd = [dotslash+"gifsicle", "-b", "-O3", "--careful", filename]
+        cmd = [pwd+"gifsicle", "-b", "-O3", "--careful", filename]
         sp.call(cmd)
