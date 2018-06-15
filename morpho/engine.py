@@ -7,10 +7,11 @@ import morpho.giffer as giffer
 # import time
 import math
 import cmath
-import os, shutil
+import os, sys, shutil
 # import traceback
 
-dotslash = os.curdir + os.sep
+# Get location of the Morpho directory.
+pwd = os.sep.join(sys.argv[0].split(os.sep)[:-1]) + os.sep
 
 ### CONSTANTS ###
 pi = cmath.pi
@@ -821,7 +822,7 @@ class Animation(object):
                 frm.plot(mation.view, mation.window)
 
             # Save current frame as a numbered PNG image.
-            imgfile = dotslash+"temp"+os.sep + int2fixedstr(mation.currentFrame, \
+            imgfile = pwd+"temp"+os.sep + int2fixedstr(mation.currentFrame, \
                 digits=numdigits(1+sum(mation.frameCount))) + ".png"
             try:
                 pyglet.image.get_buffer_manager().get_color_buffer().save(imgfile)
@@ -835,16 +836,16 @@ class Animation(object):
 
                 # Make the GIF!
                 try:
-                    giffer.makegif(directory=dotslash+"temp", saveas=filename, duration=gifDelays)
+                    giffer.makegif(directory=pwd+"temp", saveas=filename, duration=gifDelays)
                     giffer.optimizegif(filename)
                 except:
                     raise GifError
 
                 # Clean up temp directory now that we're done
                 try:
-                    if os.path.isdir(dotslash+"temp"):
-                        shutil.rmtree(dotslash+"temp")
-                    os.makedirs(dotslash+"temp")
+                    if os.path.isdir(pwd+"temp"):
+                        shutil.rmtree(pwd+"temp")
+                    os.makedirs(pwd+"temp")
                 except:
                     raise PermissionError
             else:
@@ -876,9 +877,9 @@ class Animation(object):
 
         # Clear out temp directory initially
         try:
-            if os.path.isdir(dotslash + "temp"):
-                shutil.rmtree(dotslash + "temp")
-            os.makedirs(dotslash + "temp")
+            if os.path.isdir(pwd + "temp"):
+                shutil.rmtree(pwd + "temp")
+            os.makedirs(pwd + "temp")
         except:
             raise PermissionError
 
