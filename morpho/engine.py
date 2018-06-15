@@ -1154,7 +1154,7 @@ def standardGrid(
     nhorz=10, nvert=10,
     hres=1, vres=1,
     hcolor=(0,0,1), vcolor=(0,0,1),
-    hmid=(0.5,0.5,1), vmid=(0.5,0.5,1),
+    hmidColor=(0.5,0.5,1), vmidColor=(0.5,0.5,1),
     hwidth=3, vwidth=3,
     hmidlines=True, vmidlines=True,
     BGgrid=True, axes=True,
@@ -1199,7 +1199,7 @@ def standardGrid(
         if hmidlines:
             y = ymin + (n+0.5)*(ymax-ymin)/(nhorz-1)
             Line = line(xmin+y*1j, xmax+y*1j, steps=50*hres)
-            Line.color = hmid
+            Line.color = hmidColor
             Line.width = 1
             frm.paths.insert(0, Line)
 
@@ -1216,7 +1216,7 @@ def standardGrid(
         if vmidlines:
             x = xmin + (n+0.5)*(xmax-xmin)/(nvert-1)
             Line = line(x+ymin*1j, x+ymax*1j, steps=50*vres)
-            Line.color = vmid
+            Line.color = vmidColor
             Line.width = 1
             frm.paths.insert(0, Line)
 
