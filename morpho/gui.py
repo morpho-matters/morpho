@@ -1871,7 +1871,7 @@ def saveSettings(settings, filename=pwd+"resources"+os.sep+"settings.dat", showe
 def startGUI(load=None):
     # If this is the first-time launch of Morpho, show off
     # the Power Sequence Animation
-    if not os.path.isfile(pwd+"resources"+os.sep+"settings.dat") and load==None:
+    if not os.path.isfile(pwd+"resources"+os.sep+"settings.dat"):
         # Make this file so the next time Morpho is launched,
         # it doesn't show off.
         if not saveSettings(defaultSettings, showerror=False):
@@ -1880,8 +1880,8 @@ def startGUI(load=None):
                 "Morpho isn't able to write files in its own directory. This is required in order to play animations."
                 )
             return
-
-        callPlayer()
+        if load == None: # Only show off if no file to load.
+            callPlayer()
 
     rootWin = RootWindow()
     if load != None:
@@ -1906,6 +1906,19 @@ def startGUI(load=None):
                     "Load error",
                     "For unknown reason, Morpho couldn't load the file."
                     )
+            # Show load warning upon successful load.
+            if rootWin.settings["showLoadWarning"]:
+                if not dialog.askyesno(
+                    "Load Warning",
+                    "WARNING: You should be careful before playing any animation file obtained from an untrusted source. There is a small risk that an attacker could inject malicious code into an animation file." \
+                    +"\n\n" \
+                    +"However, you do not need to worry about this if you are loading an animation from a trusted source such as your own animations or the preloaded animations." \
+                    +"\n\n" \
+                    +"Do you want to see this warning again in the future?"
+                    ):
+
+                    rootWin.settings["showLoadWarning"] = False
+                    saveSettings(rootWin.settings)
     try:
         rootWin.render()
     except:
