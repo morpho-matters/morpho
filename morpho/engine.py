@@ -11,7 +11,10 @@ import os, sys, shutil
 # import traceback
 
 # Get location of the Morpho directory.
-pwd = os.sep.join(sys.argv[0].split(os.sep)[:-1]) + os.sep
+pwd = os.sep.join(sys.argv[0].split(os.sep)[:-1])
+if os.sep not in pwd:
+    pwd = os.curdir
+pwd += os.sep
 
 ### CONSTANTS ###
 pi = cmath.pi
