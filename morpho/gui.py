@@ -43,7 +43,7 @@ isbadnum = eng.isbadnum
 # Code tells sp.call() not to make a console window (for Windows)
 CREATE_NO_WINDOW = 0x08000000
 # Location of the Morpho directory.
-pwd = os.sep.join(sys.argv[0].split(os.sep)[:-1]) + os.sep
+pwd = eng.pwd
 
 # Set exportMode to True if you're going to export Morpho
 # as a standalone using pyinstaller.
@@ -1779,7 +1779,7 @@ def str2floatTuple(st):
         for item in st.replace("(", "").replace(")", "").split(","))
 
 # Calls a separate instance of Morpho to play the animation.
-# This will either call the python script "launch_morpho.py"
+# This will either call the python script "Morpho.py"
 # or call the "Morpho" executable depending on exportMode.
 # Optional arg "exportFilename" tells callPlayer() to export
 # lastplay.mrm as the filename passed in.
@@ -1797,18 +1797,20 @@ def callPlayer(exportFilename=""):
 
     if exportMode:
         if platform.system() == "Windows":
-            cmd.extend([".\\Morpho.exe", ".\\resources\\lastplay.mrm"])
+            cmd.extend([pwd+"Morpho.exe", pwd+"resources\\lastplay.mrm"])
         else:
-            cmd.extend([pwd+"launch_morpho", pwd+"resources"+os.sep+"lastplay.mrm"])
+            cmd.extend([pwd+"Morpho", pwd+"resources"+os.sep+"lastplay.mrm"])
     else:
         if platform.system() == "Windows":
-            cmd.extend(["python", ".\\launch_morpho.py", ".\\resources\\lastplay.mrm"])
+            cmd.extend(["python", pwd+"Morpho.py", pwd+"resources\\lastplay.mrm"])
         else:
-            cmd.extend(["python3", pwd+"launch_morpho.py", pwd+"resources"+os.sep+"lastplay.mrm"])
+            cmd.extend(["python3", pwd+"Morpho.py", pwd+"resources"+os.sep+"lastplay.mrm"])
 
-    # Append export filename if provided.
-    if exportFilename != "":
-        # cmd += ' "' + exportFilename + '"'
+    # Append export filename if provided; else add --play flag.
+    if exportFilename == "":
+        cmd.append("--play")
+    else:
+        cmd.append("--export")
         cmd.append(exportFilename)
 
     if platform.system() == "Windows":
@@ -1863,10 +1865,10 @@ def saveSettings(settings, filename=pwd+"resources"+os.sep+"settings.dat", showe
 
 # Starts the GUI in the standard way.
 # Also implements some error handling.
-def startGUI():
+def startGUI(load=None):
     # If this is the first-time launch of Morpho, show off
     # the Power Sequence Animation
-    if not os.path.isfile(pwd+"resources"+os.sep+"settings.dat"):
+    if not os.path.isfile(pwd+"resources"+os.sep+"settings.dat") and load==None:
         # Make this file so the next time Morpho is launched,
         # it doesn't show off.
         if not saveSettings(defaultSettings, showerror=False):
@@ -1879,6 +1881,28 @@ def startGUI():
         callPlayer()
 
     rootWin = RootWindow()
+    if load != None:
+        # Check that the specified file exists.
+        if not os.path.isfile(load):
+            dialog.showerror(
+                "Load error",
+                "Morpho couldn't find the file to load."
+                )
+        else:
+            try:
+                # Attempt to read in the file
+                sections = rootWin.readMRM(load)
+                if len(sections) == 0:
+                    dialog.showerror(
+                        "Invalid file.",
+                        "The selected file isn't a valid Morpho Animation file.")
+                else:
+                    rootWin.load(load)
+            except:
+                dialog.showerror(
+                    "Load error",
+                    "For unknown reason, Morpho couldn't load the file."
+                    )
     try:
         rootWin.render()
     except:
