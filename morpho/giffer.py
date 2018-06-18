@@ -18,7 +18,11 @@ duration  = Duration of each frame in seconds.
             Maximum: 655 seconds. If any duration exceeds this value,
             it will be lowered to the maximum.
 '''
-pwd = os.sep.join(sys.argv[0].split(os.sep)[:-1]) + os.sep
+# Get location of the Morpho directory.
+pwd = os.sep.join(sys.argv[0].split(os.sep)[:-1])
+if os.sep not in pwd:
+    pwd = os.curdir
+pwd += os.sep
 def makegif(filenames="*", directory=pwd, saveas=pwd+"movie.gif", \
     duration=0.1):
     # Lower overflows
@@ -42,7 +46,7 @@ def optimizegif(filename):
     if not os.path.isfile(filename):
         raise FileNotFoundError
     if platform.system() == "Windows":
-        cmd = [".\\resources\\gifsicle.exe", "-b", "-O3", "--careful", filename]
+        cmd = [pwd+"resources\\gifsicle.exe", "-b", "-O3", "--careful", filename]
         sp.call(cmd, creationflags=CREATE_NO_WINDOW)
     else:
         cmd = [pwd+"resources"+os.sep+"gifsicle", "-b", "-O3", "--careful", filename]
