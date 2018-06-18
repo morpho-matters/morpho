@@ -1565,8 +1565,11 @@ class GUIstate(object):
         else:  # Default to Standard grid
             # Parse color strings into tuples and
             # compute midline colors
-            hcolor=colorStr2Tuple(frm.hcolor)
-            vcolor=colorStr2Tuple(frm.vcolor)
+            # Default to Blue if color not recognized.
+            try: hcolor = colorStr2Tuple(frm.hcolor)
+            except ValueError: hcolor = (0,0,255)
+            try: vcolor = colorStr2Tuple(frm.vcolor)
+            except ValueError: vcolor = (0,0,255)
             hmidColor = alphaOverlay((1,1,1), hcolor, alpha=0.5)
             vmidColor = alphaOverlay((1,1,1), vcolor, alpha=0.5)
             domFrame = eng.standardGrid(
