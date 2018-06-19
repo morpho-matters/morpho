@@ -2,39 +2,41 @@ Morpho animation file
 
 1.01
 
-realMax : 5.0
-imagMax : 5.0
 frameRate : 30.0
 prerender : False
 transition : 0
-window_width : 600
+realMax : 5.0
+tweenMethod : direct
 realMin : -5.0
 window_height : 600
-tweenMethod : direct
 imagMin : -5.0
+imagMax : 5.0
+window_width : 600
 
-hide : False
 BGgrid : True
-type : domain
-id : 0
-nhorz : 11
-nvert : 11
-tweenDuration : 3
-horzRes : 1
-name : Domain
-horzMidlines : True
-BG : (0, 0, 0)
-grid : Standard
-vertRes : 1
-delay : 0
-vertMidlines : True
-axes : True
-
+vertRes : 1.0
 hide : False
-type : range
-name : Polar grid
-delay : 0.0
-base : 0
+hcolor : green
+nhorz : 11
+grid : Standard
 tweenDuration : 3.0
+nvert : 11
+horzMidlines : True
+delay : 0.0
+horzRes : 1.0
+vertMidlines : True
+id : 0
+vcolor : blue
+axes : True
+type : domain
+BG : (0.0, 0.0, 0.0)
+name : Domain
+
 function : polargrid(s)
 id : 1
+hide : False
+delay : 0.0
+tweenDuration : 3.0
+base : 0
+type : range
+name : Polar grid
