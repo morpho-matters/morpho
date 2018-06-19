@@ -1,54 +1,60 @@
 Morpho animation file
 
-1.0
+1.01
 
-imagMax : 5.0
-frameRate : 30.0
-imagMin : -5.0
+window_height : 600
 tweenMethod : direct
+imagMax : 5.0
+window_width : 600
+frameRate : 30.0
 transition : 0
+realMax : 5.0
 prerender : False
 realMin : -5.0
-window_height : 600
-window_width : 600
-realMax : 5.0
+imagMin : -5.0
 
+hide : False
+hcolor : green
 grid : Standard
-delay : 0
-tweenDuration : 3
-horzRes : 1
-vertRes : 1
 axes : True
-BG : (0, 0, 0)
+horzRes : 1.0
+type : domain
 nhorz : 11
-name : Domain
-BGgrid : True
+vcolor : blue
 horzMidlines : True
+BGgrid : True
+tweenDuration : 3.0
+id : 0
+delay : 0.0
 nvert : 11
 vertMidlines : True
-id : 0
-type : domain
+BG : (0.0, 0.0, 0.0)
+vertRes : 1.0
+name : Domain
 
-name : sin(s)
-function : sin(s)
-delay : 2.0
-base : 0
+hide : False
 tweenDuration : 3.0
 id : 1
-type : range
-
-name : cos(s)
-function : cos(s)
 delay : 2.0
+type : range
+function : sin(s)
 base : 0
+name : sin(s)
+
+hide : False
 tweenDuration : 3.0
 id : 2
-type : range
-
-name : exp(s)
-function : exp(s)
 delay : 2.0
+type : range
+function : cos(s)
 base : 0
+name : cos(s)
+
+hide : False
 tweenDuration : 3.0
 id : 3
+delay : 2.0
 type : range
+function : exp(s)
+base : 0
+name : exp(s)

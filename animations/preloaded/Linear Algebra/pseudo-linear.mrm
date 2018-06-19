@@ -2,66 +2,68 @@ Morpho animation file
 
 1.01
 
-transition : 0
-window_height : 800
-frameRate : 30.0
-window_width : 800
-imagMax : 1.0
-tweenMethod : direct
 realMax : 1.0
+window_height : 600
 prerender : False
+transition : 0
+tweenMethod : direct
 realMin : -1.0
 imagMin : -1.0
+imagMax : 1.0
+frameRate : 30.0
+window_width : 600
 
-axes : True
-hide : False
+vertMidlines : True
 nvert : 11
-name : Domain
+nhorz : 11
+tweenDuration : 3.0
+id : 0
 vertRes : 1.0
 BGgrid : False
-horzRes : 1.0
-horzMidlines : True
+name : Domain
+axes : True
 grid : Standard
-vertMidlines : True
-id : 0
+horzMidlines : True
 type : domain
-nhorz : 11
+hide : False
 delay : 0.0
+horzRes : 1.0
 BG : (0.0, 0.0, 0.0)
-tweenDuration : 3.0
+vcolor : blue
+hcolor : blue
 
-type : range
-hide : False
-function : sqrt(abs(Re(s)))*sgn(Re(s)) + i*sqrt(abs(Im(s)))*sgn(Im(s))
-id : 3
 name : Pseudo-Linear Transformation
+function : sqrt(abs(Re(s)))*sgn(Re(s)) + i*sqrt(abs(Im(s)))*sgn(Im(s))
 base : 0
+type : range
+hide : False
 delay : 2.0
+id : 3
 tweenDuration : 3.0
 
-type : range
-hide : False
-function : s
-id : 4
 name : Domain again
+function : s
 base : 0
-delay : 1.0
-tweenDuration : 1.0
-
 type : range
 hide : False
-function : s*exp(i*pi/4)
-id : 5
+delay : 1.0
+id : 4
+tweenDuration : 1.0
+
 name : Rotated grid
+function : s*exp(i*pi/4)
 base : 0
-delay : 1.0
-tweenDuration : 1.0
-
 type : range
 hide : False
-function : sqrt(abs(Re(s)))*sgn(Re(s)) + i*sqrt(abs(Im(s)))*sgn(Im(s))
-id : 6
+delay : 1.0
+id : 5
+tweenDuration : 1.0
+
 name : Pseudo-Linear Transformation again
+function : sqrt(abs(Re(s)))*sgn(Re(s)) + i*sqrt(abs(Im(s)))*sgn(Im(s))
 base : 5
+type : range
+hide : False
 delay : 2.0
+id : 6
 tweenDuration : 3.0

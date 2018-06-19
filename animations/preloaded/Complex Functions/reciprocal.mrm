@@ -1,49 +1,51 @@
 Morpho animation file
 
-1.0
+1.01
 
-imagMax : 5.0
-prerender : False
-realMax : 5.0
-window_width : 600
 window_height : 600
-transition : 0
 imagMin : -5.0
-tweenMethod : direct
 frameRate : 30.0
+prerender : False
+tweenMethod : direct
+realMax : 5.0
 realMin : -5.0
+imagMax : 5.0
+transition : 0
+window_width : 600
 
-nvert : 11
-name : Domain
-delay : 0.0
-id : 0
-grid : Standard
-axes : True
-hide : False
-nhorz : 11
-vertRes : 1.0
 BG : (0.0, 0.0, 0.0)
-horzRes : 1.0
-BGgrid : True
+grid : Standard
+delay : 0.0
+axes : True
 horzMidlines : True
-vertMidlines : True
+hcolor : green
 type : domain
+vcolor : blue
+vertRes : 1.0
+nhorz : 11
+id : 0
+name : Domain
+BGgrid : True
+nvert : 11
+hide : False
+horzRes : 1.0
+vertMidlines : True
 tweenDuration : 3.0
 
-hide : False
-base : 0
-tweenDuration : 3.0
-name : Reciprocal
 delay : 2.0
-id : 1
+base : 0
+name : Reciprocal
 function : 10/s
 type : range
-
-hide : False
-base : 0
+id : 1
 tweenDuration : 3.0
-name : Domain again
+hide : False
+
 delay : 2.0
-id : 2
+base : 0
+name : Domain again
 function : s
 type : range
+id : 2
+tweenDuration : 3.0
+hide : False

@@ -2,57 +2,59 @@ Morpho animation file
 
 1.01
 
+imagMin : -4.0
+frameRate : 30.0
 tweenMethod : spiral
-transition : 0
 imagMax : 4.0
-window_height : 600
 realMax : 4.0
 realMin : -4.0
+transition : 0
 prerender : False
-frameRate : 30.0
-imagMin : -4.0
 window_width : 600
+window_height : 600
 
-BGgrid : True
-id : 0
-name : Domain
-vertRes : 1.0
 grid : Standard
-horzMidlines : True
-tweenDuration : 3.0
-delay : 0.0
-axes : True
-horzRes : 1.0
 BG : (0.0, 0.0, 0.0)
-vertMidlines : True
+horzMidlines : True
+id : 0
+vertRes : 1.0
 nhorz : 9
-hide : True
+hcolor : green
+axes : True
+vertMidlines : True
 type : domain
-nvert : 9
-
-id : 1
-name : Polar grid
-tweenDuration : 3.0
-function : 0.5*polargrid(s)
-base : 0
+name : Domain
 hide : True
+tweenDuration : 3.0
+nvert : 9
+horzRes : 1.0
+BGgrid : True
+delay : 0.0
+vcolor : blue
+
 type : range
+name : Polar grid
+hide : True
+function : 0.5*polargrid(s)
+id : 1
+tweenDuration : 3.0
+base : 0
 delay : 2.0
 
-id : 2
+type : range
 name : Clipped grid
-tweenDuration : 3.0
-function : s if Re(s) >= 0 and Im(s) >= 0 else nan
-base : 1
 hide : False
-type : range
+function : s if Re(s) >= 0 and Im(s) >= 0 else nan
+id : 2
+tweenDuration : 3.0
+base : 1
 delay : 2.0
 
-id : 3
-name : Squared
-tweenDuration : 3.0
-function : s^2
-base : 2
-hide : False
 type : range
+name : Squared
+hide : False
+function : s^2
+id : 3
+tweenDuration : 3.0
+base : 2
 delay : 2.0
