@@ -14,6 +14,7 @@ def runMRM(filename=pwd+"resources"+os.sep+"lastplay.mrm", exportFilename=""):
                 "File not found",
                 "Morpho couldn't find \""+filename+"\". This is necessary in order to play or export the animation."
                 )
+            return
         except:
             dialog.showerror(
                 "Load Error",
