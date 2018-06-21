@@ -9,10 +9,15 @@ def runMRM(filename=pwd+"resources"+os.sep+"lastplay.mrm", exportFilename=""):
         state = gui.GUIstate()
         try:
             state.load(filename)
+        except FileNotFoundError:
+            dialog.showerror(
+                "File not found",
+                "Morpho couldn't find \""+filename+"\". This is necessary in order to play or export the animation."
+                )
         except:
             dialog.showerror(
                 "Load Error",
-                "Morpho can't access lastplay.mrm in its own directory. This is necessary in order to play the animation."
+                "Morpho could not load \""+filename+"\". This is necessary in order to play or export the animation."
                 )
             return
 
