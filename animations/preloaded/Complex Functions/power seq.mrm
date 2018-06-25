@@ -2,77 +2,77 @@ Morpho animation file
 
 1.01
 
-realMax : 5.0
-window_height : 800
-prerender : False
-transition : 0
-imagMin : -5.0
-window_width : 800
-imagMax : 5.0
-realMin : -5.0
-frameRate : 30.0
+window_width : 600
 tweenMethod : spiral
+realMin : -5.0
+imagMax : 5.0
+window_height : 600
+realMax : 5.0
+prerender : False
+frameRate : 30.0
+imagMin : -5.0
+transition : 0
 
-delay : 0.0
-id : 0
-nhorz : 11
-horzRes : 1.0
-grid : Standard
-BG : (0.0, 0.0, 0.0)
-hcolor : green
-hide : False
-vertMidlines : True
-type : domain
-BGgrid : True
-axes : True
-nvert : 11
 name : Domain
+BG : (0.0, 0.0, 0.0)
+nhorz : 11
+BGgrid : True
+grid : Standard
+id : 0
+nvert : 11
 vertRes : 1.0
-horzMidlines : True
+horzRes : 1.0
+type : domain
+delay : 0.0
 vcolor : blue
+axes : True
+hcolor : green
+vertMidlines : True
+horzMidlines : True
 tweenDuration : 3.0
+hide : False
 
-delay : 2.0
-id : 1
-base : 0
 name : s^2
+type : range
+id : 1
 function : s^2/10
-hide : False
-type : range
-tweenDuration : 3.0
-
-delay : 2.0
-id : 2
 base : 0
+delay : 2.0
+tweenDuration : 3.0
+hide : False
+
 name : s^3
+type : range
+id : 2
 function : s^3/64
-hide : False
-type : range
-tweenDuration : 3.0
-
-delay : 2.0
-id : 3
 base : 0
+delay : 2.0
+tweenDuration : 3.0
+hide : False
+
 name : s^4
+type : range
+id : 3
 function : s^4/8^3
-hide : False
-type : range
-tweenDuration : 3.0
-
-delay : 2.0
-id : 5
 base : 0
+delay : 2.0
+tweenDuration : 3.0
+hide : False
+
 name : s^5
+type : range
+id : 5
 function : s^5/8^4
-hide : False
-type : range
-tweenDuration : 3.0
-
-delay : 2.0
-id : 4
 base : 0
-name : Domain again
-function : s
-hide : False
-type : range
+delay : 2.0
 tweenDuration : 3.0
+hide : False
+
+name : Domain again
+type : range
+id : 4
+function : s
+base : 0
+delay : 2.0
+tweenDuration : 3.0
+hide : False
