@@ -744,13 +744,14 @@ class RootWindow(object):
 
         # Ask the user (possibly repeatedly) where to save the file.
         while True:
-            # Initial directory is platform and mode dependent.
-            if platform.system() != "Windows" and exportMode:
-                initDir = pwd+os.pardir+os.sep+os.pardir+os.sep+os.pardir+os.sep+"animations"
-                # Default to home directory if animations/ directory not found.
-                if not os.path.isdir(initDir): initDir = "~"+os.sep
-            else:
-                initDir = pwd+"animations"
+            initDir = pwd+"animations"
+            # # Initial directory is platform and mode dependent.
+            # if platform.system() != "Windows" and exportMode:
+            #     initDir = pwd+os.pardir+os.sep+os.pardir+os.sep+os.pardir+os.sep+"animations"
+            #     # Default to home directory if animations/ directory not found.
+            #     if not os.path.isdir(initDir): initDir = "~"+os.sep
+            # else:
+            #     initDir = pwd+"animations"
             filename = filedialog.asksaveasfilename(
                 initialdir=initDir, defaultextension="mrm",
                 filetypes=(("Morpho Animation", "*.mrm"), ("GIF animation", "*.gif"))
@@ -819,13 +820,14 @@ class RootWindow(object):
 
         # Ask the user (possibly repeatedly) for the file to open.
         while True:
-            # Initial directory is platform and mode dependent.
-            if platform.system() != "Windows" and exportMode:
-                initDir = pwd+os.pardir+os.sep+os.pardir+os.sep+os.pardir+os.sep+"animations"
-                # Default to home directory if animations/ directory not found.
-                if not os.path.isdir(initDir): initDir = "~"+os.sep
-            else:
-                initDir = pwd+"animations"
+            initDir = pwd+"animations"
+            # # Initial directory is platform and mode dependent.
+            # if platform.system() != "Windows" and exportMode:
+            #     initDir = pwd+os.pardir+os.sep+os.pardir+os.sep+os.pardir+os.sep+"animations"
+            #     # Default to home directory if animations/ directory not found.
+            #     if not os.path.isdir(initDir): initDir = "~"+os.sep
+            # else:
+            #     initDir = pwd+"animations"
             filename = filedialog.askopenfilename(
                 initialdir=initDir, defaultextension="mrm",
                 filetypes=(("Morpho Animation", "*.mrm"), ("All Files", "*.*"))
