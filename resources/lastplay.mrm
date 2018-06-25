@@ -2,77 +2,77 @@ Morpho animation file
 
 1.01
 
-prerender : False
-imagMin : -5.0
-window_width : 800
-imagMax : 5.0
-realMax : 5.0
-realMin : -5.0
-window_height : 800
-frameRate : 30.0
+window_width : 600
 tweenMethod : spiral
+realMin : -5.0
+imagMax : 5.0
+window_height : 600
+realMax : 5.0
+prerender : False
+frameRate : 30.0
+imagMin : -5.0
 transition : 0
 
-BG : (0.0, 0.0, 0.0)
-vertMidlines : True
-delay : 0.0
-vcolor : blue
-nhorz : 11
-nvert : 11
 name : Domain
-axes : True
-horzRes : 1.0
-horzMidlines : True
-hcolor : green
+BG : (0.0, 0.0, 0.0)
+nhorz : 11
 BGgrid : True
 grid : Standard
-type : domain
-hide : False
 id : 0
+nvert : 11
 vertRes : 1.0
+horzRes : 1.0
+type : domain
+delay : 0.0
+vcolor : blue
+axes : True
+hcolor : green
+vertMidlines : True
+horzMidlines : True
 tweenDuration : 3.0
-
-delay : 2.0
-function : s^2/10
-type : range
 hide : False
-base : 0
+
 name : s^2
-tweenDuration : 3.0
+type : range
 id : 1
-
-delay : 2.0
-function : s^3/64
-type : range
-hide : False
+function : s^2/10
 base : 0
+delay : 2.0
+tweenDuration : 3.0
+hide : False
+
 name : s^3
-tweenDuration : 3.0
+type : range
 id : 2
-
-delay : 2.0
-function : s^4/8^3
-type : range
-hide : False
+function : s^3/64
 base : 0
+delay : 2.0
+tweenDuration : 3.0
+hide : False
+
 name : s^4
-tweenDuration : 3.0
+type : range
 id : 3
-
-delay : 2.0
-function : s^5/8^4
-type : range
-hide : False
+function : s^4/8^3
 base : 0
+delay : 2.0
+tweenDuration : 3.0
+hide : False
+
 name : s^5
-tweenDuration : 3.0
-id : 5
-
-delay : 2.0
-function : s
 type : range
-hide : False
+id : 5
+function : s^5/8^4
 base : 0
-name : Domain again
+delay : 2.0
 tweenDuration : 3.0
+hide : False
+
+name : Domain again
+type : range
 id : 4
+function : s
+base : 0
+delay : 2.0
+tweenDuration : 3.0
+hide : False
