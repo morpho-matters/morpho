@@ -887,7 +887,7 @@ class EditDomainWindow(object):
         self.gridMenu = tk.OptionMenu(
             gridFrame1, self.gridOpts, "Standard", "Zeta"
             )
-        self.gridMenu.config(width=7)
+        self.gridMenu.config(width=12)
         self.gridMenu.grid(sticky="w", padx=5, row=0, column=1)
 
         gridFrame2 = tk.Frame(mainFrame)
