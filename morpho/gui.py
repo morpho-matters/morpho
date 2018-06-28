@@ -18,14 +18,15 @@ import tkinter as tk
 from tkinter import filedialog, ttk, messagebox
 dialog = messagebox  # I like the name "dialog" better
 
-import os
+import os, sys
 import subprocess as sp
+import platform
 
 import morpho.engine as eng
 import morpho.whitelist as wh
 
 # Current Morpho version
-version = 1.01
+version = 1.1
 
 # fileVersion should only be changed when animations saved with
 # an updated version of Morpho can't be played by older versions.
@@ -39,12 +40,18 @@ from morpho.functions import *
 
 # Detects infs and nans (real or complex)
 isbadnum = eng.isbadnum
-# Code tells sp.call() not to make a console window
+# Code tells sp.call() not to make a console window (for Windows)
 CREATE_NO_WINDOW = 0x08000000
+# Location of the Morpho directory.
+pwd = eng.pwd
 
 # Set exportMode to True if you're going to export Morpho
 # as a standalone using pyinstaller.
 exportMode = False
+
+# Set this to True if you're debugging the player so that
+# errors get written to the console.
+runLocal = False
 
 # Special exception gets raised if user attempts to load an
 # invalid animation file.
@@ -573,7 +580,7 @@ class RootWindow(object):
         return True
 
 
-    def play(self):
+    def play(self, runLocal=runLocal):
         '''
         This is a hack to get around a bug where successive
         plays of an animation would progressively have
@@ -584,12 +591,11 @@ class RootWindow(object):
         directory and then calls a separate instance
         of itself to read it in and play the animation.
         '''
-        # self._run(); return  # Uncomment if debugging the _run() method.
 
         if not self.sanityCheck(): return
 
         try:
-            self.save("./lastplay.mrm")
+            self.save(pwd+"resources"+os.sep+"lastplay.mrm")
         except PermissionError:
             dialog.showerror(
                 "File permission error",
@@ -603,14 +609,12 @@ class RootWindow(object):
                 )
             return
 
-        # exportMode should be set to True at the beginning of this file
-        # if you're about to export Morpho as a standalone.
-        # If you're just trying to run the script, exportMode should
-        # be set to False.
-        if exportMode:
-            sp.call("player.exe", creationflags=CREATE_NO_WINDOW)
+        if runLocal:
+            state = GUIstate()
+            state.load(pwd+"resources"+os.sep+"lastplay.mrm")
+            state.run()
         else:
-            sp.call("python player.py", creationflags=CREATE_NO_WINDOW)
+            callPlayer()
 
     # This method will ACTUALLY play the animation.
     # The play() method just writes the animation
@@ -624,124 +628,8 @@ class RootWindow(object):
         if not self.sanityCheck(showerror=False):
             raise RuntimeError("Some widgets are unparsable.")
 
-        # Check all function formulas against the whitelist
-        if not wh.checkFramelist(self.frames):
-            dialog.showerror(
-                "Invalid functions",
-                "This animation can't be played since some of the function formulas are invalid."
-                )
-            return
-        # If you made it here, then all the function formulas should be safe.
+        self.play(runLocal=True)
 
-        # Read in all inputs
-        realMin = float(self.realMin.get())
-        realMax = float(self.realMax.get())
-        imagMin = float(self.imagMin.get())
-        imagMax = float(self.imagMax.get())
-        window_width = int(self.window_width.get())
-        window_height = int(self.window_height.get())
-        frameRate = float(self.frameRate.get())
-        prerender = bool(self.prerender.get())
-        tweenMethod = ["direct", "spiral"][self.tweenMethod.get()]
-        transition = self.transition.get()
-
-        # Setup basic animation settings
-        mation = eng.Animation()
-        mation.frameRate = frameRate
-        mation.view = [realMin, realMax, imagMin, imagMax]
-        mation.windowShape = (window_width, window_height)
-        if transition == 1:
-            mation.transition = eng.Animation.linear
-        mation.tweenMethod = tweenMethod
-
-        # Compile all the frames!
-        # First we need the domain frame.
-        # Find it and construct it!
-        for frm in self.frames:
-            if frm.type == "domain": break
-        if frm.grid == "Standard":
-            domFrame = eng.standardGrid(
-                view=mation.view,
-                nhorz=frm.nhorz, nvert=frm.nvert,
-                hres=frm.horzRes, vres=frm.vertRes,
-                hmidlines=frm.horzMidlines,
-                vmidlines=frm.vertMidlines,
-                BGgrid=frm.BGgrid, axes=frm.axes,
-                delay=frm.delay*frameRate)
-        else:
-            # Resolution is taken to be the maximum supplied res
-            # amongst horizontal and vertical
-            domFrame = eng.zetaGrid(max(frm.horzRes, frm.vertRes))
-
-        domFrame.id = 0
-        domFrame.optimizePaths()
-
-        # Create polar grid from square, centered domain grid
-        polargrid = lambda s: Re(s)*exp(Im(s)/imagMax*pi/2*i)
-
-        # Now let's create all the other frames!
-        # Construct the (visible) descendents of a parent mframe
-        def constructDescendents(parent, ID):
-            nonlocal polargrid
-
-            # Get child list of framedata structures
-            children = []
-            for frm in self.frames:
-                if frm.type != "domain" and frm.base == ID:
-                    children.append(frm)
-
-            mframes = []
-            for child in children:
-                # Construct evaluation function
-                expr = child.function
-                expr = expr.replace("^", "**")  # Pythonize carets
-
-                func = eval("lambda s, polargrid=polargrid: complex(" + expr + ")")
-
-                # Apply the function to the parent frame
-                try:
-                    mframe = parent.fimage(func)
-                except:
-                    raise Exception("fimage error")
-
-                mframe.delay = round(child.delay*frameRate)
-                mframe.id = child.id
-                mframes.append(mframe)
-                mframes.extend(constructDescendents(mframe, child.id))
-            return mframes
-
-
-        mframes = [domFrame]
-        mframes.extend(constructDescendents(domFrame, ID=0))
-
-        # Isolate visible frames
-        visibleFrames = []
-        for frm in self.frames:
-            if not frm.hide:
-                visibleFrames.append(frm)
-
-        # Arrange the mframes in the order of visibleFrames
-        rearranged = []
-        for frm in visibleFrames:
-            for mfrm in mframes:
-                if mfrm.id == frm.id:
-                    rearranged.append(mfrm)
-        mframes = rearranged
-
-        # Add in the frames for the animation!
-        mation.keyframes = mframes
-
-        # Get timing for each frame tween
-        for n in range(1, len(visibleFrames)):
-            mation.frameCount.append(
-                max(2, round(visibleFrames[n].tweenDuration*frameRate)))
-
-        # Prerender if necessary
-        if prerender:
-            mation.prerender()
-
-        # RUN!!!!
-        mation.run()
 
     # Attempt to read in the animation file
     # Check that it's a valid MRM file also.
@@ -776,85 +664,26 @@ class RootWindow(object):
     etc.
     '''
     def load(self, filename):
-        # Read in file (if possible)
-        if not os.path.isfile(filename):
-            raise FileNotFoundError
-        with open(filename, "r") as file:
-            sections = file.read().strip().split("\n\n")
-        preamble = sections[0]
-        if preamble != "Morpho animation file":
-            raise FileFormatError("Invalid morpho animation file")
-        try:
-            loadedVersion = float(sections[1])
-        except (IndexError, ValueError):
-            raise FileFormatError("Invalid morpho animation file")
-        if loadedVersion > fileVersion:
-            raise VersionError("This version of Morpho can't load this animation")
+        state = GUIstate()
+        state.load(filename)
 
-        # Third section is the basic animation settings
-        items = sections[2].split("\n")
-        basicSettings = {}
-        for item in items:
-            pair = item.split(" : ")
-            basicSettings[pair[0].strip()] = pair[1].strip()
-
-        # Now go frame by frame
-
-        # "Primitive" since the values are all strings,
-        # not proper data types
-        primitiveFrames = []
-        for n in range(3, len(sections)):
-            items = sections[n].split("\n")
-            settings = {}
-            for item in items:
-                pair = item.split(" : ")
-                settings[pair[0].strip()] = pair[1].strip()
-            primitiveFrames.append(settings)
-
-        # Now build the actual framedata objects
-        frames = []
-        for primFrm in primitiveFrames:
-            if primFrm["type"] == "domain":
-                frm = DomainFrame(**primFrm)
-                frm.id = int(frm.id)
-                frm.hide = (frm.hide == "True")
-                frm.nhorz = int(frm.nhorz)
-                frm.nvert = int(frm.nvert)
-                frm.horzRes = float(frm.horzRes)
-                frm.vertRes = float(frm.vertRes)
-                frm.horzMidlines = (frm.horzMidlines == "True")
-                frm.vertMidlines = (frm.vertMidlines == "True")
-                frm.axes = (frm.axes == "True")
-                frm.BGgrid = (frm.BGgrid == "True")
-                frm.BG = str2floatTuple(frm.BG)
-                frm.tweenDuration = float(frm.tweenDuration)
-                frm.delay = float(frm.delay)
-            else:
-                frm = RangeFrame(**primFrm)
-                frm.id = int(frm.id)
-                frm.hide = (frm.hide == "True")
-                frm.base = int(frm.base)
-                frm.tweenDuration = float(frm.tweenDuration)
-                frm.delay = float(frm.delay)
-            frames.append(frm)
-
-        self.frames = frames
+        self.frames = state.frames
 
         # # Update the nextID parameter to be greater than all the
         # # frame ID's currently in the frame list.
         # self.nextID = 1 + max([frm.id for frm in self.frames])
 
         # Build the basic animation GUI
-        self.realMin.set(fl2str(float(basicSettings["realMin"])))
-        self.realMax.set(fl2str(float(basicSettings["realMax"])))
-        self.imagMin.set(fl2str(float(basicSettings["imagMin"])))
-        self.imagMax.set(fl2str(float(basicSettings["imagMax"])))
-        self.window_width.set(basicSettings["window_width"])
-        self.window_height.set(basicSettings["window_height"])
-        self.frameRate.set(fl2str(float(basicSettings["frameRate"])))
-        self.prerender.set(int(basicSettings["prerender"] == "True"))
-        self.tweenMethod.set(["direct", "spiral"].index(basicSettings["tweenMethod"]))
-        self.transition.set(int(basicSettings["transition"]))
+        self.realMin.set(state.realMin)
+        self.realMax.set(state.realMax)
+        self.imagMin.set(state.imagMin)
+        self.imagMax.set(state.imagMax)
+        self.window_width.set(state.window_width)
+        self.window_height.set(state.window_height)
+        self.frameRate.set(state.frameRate)
+        self.prerender.set(state.prerender)
+        self.tweenMethod.set(state.tweenMethod)
+        self.transition.set(state.transition)
 
         # Refresh the frame list
         self.updateListbox()
@@ -893,7 +722,8 @@ class RootWindow(object):
         }
 
         # Stringify all the data and prepare it to be written
-        content = "Morpho animation file\n\n"+str(fileVersion)+"\n\n"
+        preamble = "Morpho animation file"
+        content = preamble + "\n\n"+str(fileVersion)+"\n\n"
         for key in state:
             content += key + " : " + str(state[key]) + "\n"
         content += "\n"
@@ -914,28 +744,63 @@ class RootWindow(object):
 
         # Ask the user (possibly repeatedly) where to save the file.
         while True:
+            initDir = pwd+"animations"
+            # # Initial directory is platform and mode dependent.
+            # if platform.system() != "Windows" and exportMode:
+            #     initDir = pwd+os.pardir+os.sep+os.pardir+os.sep+os.pardir+os.sep+"animations"
+            #     # Default to home directory if animations/ directory not found.
+            #     if not os.path.isdir(initDir): initDir = "~"+os.sep
+            # else:
+            #     initDir = pwd+"animations"
             filename = filedialog.asksaveasfilename(
-                initialdir="./animations", defaultextension="mrm",
-                filetypes=(("Morpho Animation", "*.mrm"),)
+                initialdir=initDir, defaultextension="mrm",
+                filetypes=(("Morpho Animation", "*.mrm"), ("GIF animation", "*.gif"))
                 )
 
             if filename == "": return
 
-            # Try to save the file
-            try:
-                self.save(filename)
-            except PermissionError:
-                dialog.showerror(
-                    "Permission Error!",
-                    "Can't save in that location. Access denied. You'll have to save the file somewhere else."
-                    )
-                continue
-            except:
-                dialog.showerror(
-                    "Unknown error",
-                    "Some unknown error prevented saving in that location. Try saving somewhere else."
-                    )
-                continue
+            # Handle GIF export case
+            if filename[-4:].lower() == ".gif":
+                # Save MRM to lastplay.mrm
+                try:
+                    self.save(pwd+"resources"+os.sep+"lastplay.mrm")
+                except PermissionError:
+                    dialog.showerror(
+                        "File permission error",
+                        "Morpho doesn't have permission to write files in its own directory. This is required in order to export animations."
+                        )
+                    return
+                except:
+                    dialog.showerror(
+                        "File error",
+                        "Morpho isn't able to write files in its own directory. This is required in order to export animations."
+                        )
+                    return
+
+                # Execute the player in export mode
+                if runLocal:
+                    state = GUIstate()
+                    state.load(pwd+"resources"+os.sep+"lastplay.mrm")
+                    state.export(filename)
+                else:
+                    callPlayer(exportFilename=filename)
+
+            else:
+                # Try to save the file
+                try:
+                    self.save(filename)
+                except PermissionError:
+                    dialog.showerror(
+                        "Permission Error!",
+                        "Can't save in that location. Access denied. You'll have to save the file somewhere else."
+                        )
+                    continue
+                except:
+                    dialog.showerror(
+                        "Unknown error",
+                        "Some unknown error prevented saving in that location. Try saving somewhere else."
+                        )
+                    continue
             break
 
     def loadButton(self):
@@ -955,8 +820,16 @@ class RootWindow(object):
 
         # Ask the user (possibly repeatedly) for the file to open.
         while True:
+            initDir = pwd+"animations"
+            # # Initial directory is platform and mode dependent.
+            # if platform.system() != "Windows" and exportMode:
+            #     initDir = pwd+os.pardir+os.sep+os.pardir+os.sep+os.pardir+os.sep+"animations"
+            #     # Default to home directory if animations/ directory not found.
+            #     if not os.path.isdir(initDir): initDir = "~"+os.sep
+            # else:
+            #     initDir = pwd+"animations"
             filename = filedialog.askopenfilename(
-                initialdir="./animations", defaultextension="mrm",
+                initialdir=initDir, defaultextension="mrm",
                 filetypes=(("Morpho Animation", "*.mrm"), ("All Files", "*.*"))
                 )
 
@@ -1016,28 +889,40 @@ class EditDomainWindow(object):
         self.gridMenu = tk.OptionMenu(
             gridFrame1, self.gridOpts, "Standard", "Zeta"
             )
-        self.gridMenu.config(width=7)
+        self.gridMenu.config(width=12)
         self.gridMenu.grid(sticky="w", padx=5, row=0, column=1)
 
         gridFrame2 = tk.Frame(mainFrame)
         gridFrame2.grid(sticky="w", padx=10, pady=5, row=1)
+
+        tk.Label(master=gridFrame2, text="Number") \
+            .grid(sticky="we", padx=5, row=0, column=1)
+
+        tk.Label(master=gridFrame2, text="Resolution") \
+            .grid(sticky="we", padx=5, row=0, column=3)
+
+        tk.Label(master=gridFrame2, text="Color") \
+            .grid(sticky="we", padx=5, row=0, column=4)
 
         tk.Label(master=gridFrame2, text="Horizontal Lines:") \
             .grid(sticky="w", padx=5, row=1, column=0)
 
         self.nhorz = tk.StringVar(self.root, value=str(frame.nhorz))
         tk.Entry(master=gridFrame2, width=5, textvariable=self.nhorz) \
-            .grid(sticky="w", padx=5, row=1, column=1)
+            .grid(sticky="we", padx=5, row=1, column=1)
 
         # Separater frame
         tk.Frame(gridFrame2).grid(padx=5, row=1, column=2)
 
-        tk.Label(master=gridFrame2, text="Resolution:") \
-            .grid(sticky="w", padx=5, row=1, column=3)
-
         self.horzRes = tk.StringVar(self.root, value=fl2str(frame.horzRes))
         tk.Entry(master=gridFrame2, width=3, textvariable=self.horzRes) \
-            .grid(sticky="w", padx=5, row=1, column=4)
+            .grid(sticky="we", padx=5, row=1, column=3)
+
+
+        self.horzColor = tk.StringVar(self.root, value=frame.hcolor)
+        ttk.Combobox(master=gridFrame2, values=colors,
+            textvariable=self.horzColor, width=8) \
+            .grid(sticky="we", padx=5, row=1, column=4)
 
         self.horzMidlines = tk.IntVar(self.root, value=int(frame.horzMidlines))
         tk.Checkbutton(master=gridFrame2,
@@ -1051,17 +936,19 @@ class EditDomainWindow(object):
 
         self.nvert = tk.StringVar(self.root, value=str(frame.nvert))
         tk.Entry(master=gridFrame2, width=5, textvariable=self.nvert) \
-            .grid(sticky="w", padx=5, row=2, column=1)
+            .grid(sticky="we", padx=5, row=2, column=1)
 
         # Separater frame
         tk.Frame(gridFrame2).grid(padx=5, row=2, column=2)
 
-        tk.Label(master=gridFrame2, text="Resolution:") \
-            .grid(sticky="w", padx=5, row=2, column=3)
-
         self.vertRes = tk.StringVar(self.root, value=fl2str(frame.vertRes))
         tk.Entry(master=gridFrame2, width=3, textvariable=self.vertRes) \
-            .grid(sticky="w", padx=5, row=2, column=4)
+            .grid(sticky="we", padx=5, row=2, column=3)
+
+        self.vertColor = tk.StringVar(self.root, value=frame.vcolor)
+        ttk.Combobox(master=gridFrame2, values=colors,
+            textvariable=self.vertColor, width=8) \
+            .grid(sticky="we", padx=5, row=2, column=4)
 
         self.vertMidlines = tk.IntVar(self.root, value=int(frame.vertMidlines))
         tk.Checkbutton(master=gridFrame2,
@@ -1138,9 +1025,11 @@ class EditDomainWindow(object):
         self.frame.grid = self.gridOpts.get()
         self.frame.nhorz = int(self.nhorz.get())
         self.frame.horzRes = float(self.horzRes.get())
+        self.frame.hcolor = self.horzColor.get().strip().lower()
         self.frame.horzMidlines = bool(self.horzMidlines.get())
         self.frame.nvert = int(self.nvert.get())
         self.frame.vertRes = float(self.vertRes.get())
+        self.frame.vcolor = self.vertColor.get().strip().lower()
         self.frame.vertMidlines = bool(self.vertMidlines.get())
         self.frame.axes = bool(self.axes.get())
         self.frame.BGgrid = bool(self.BGgrid.get())
@@ -1165,8 +1054,10 @@ class EditDomainWindow(object):
         try:
             nhorz = int(self.nhorz.get())
             horzRes = float(self.horzRes.get())
+            hcolor = self.horzColor.get().strip().lower()
             nvert = int(self.nvert.get())
             vertRes = float(self.vertRes.get())
+            vcolor = self.vertColor.get().strip().lower()
             tweenDuration = float(self.tweenDuration.get())
             delay = float(self.delay.get())
         except ValueError:
@@ -1190,6 +1081,13 @@ class EditDomainWindow(object):
                 dialog.showerror(
                     "Resolution error",
                     "Resolution values must be positive real numbers.")
+            return False
+        if not((hcolor in colormap or validHexColor(hcolor)) and \
+            (vcolor in colormap or validHexColor(vcolor))):
+            if showerror:
+                dialog.showerror(
+                    "Color error",
+                    "Horizontal or Vertical color not recognized.")
             return False
         if isbadnum(tweenDuration) or tweenDuration < 0:
             if showerror:
@@ -1468,17 +1366,335 @@ class ApplyWindow(object):
 
         return True
 
-# # Not used (yet)
-# colormap = {
-#     "black": (0,0,0),
-#     "white": (1,1,1),
-#     "red": (1,0,0),
-#     "green": (0,1,0),
-#     "blue": (0,0,1),
-#     "yellow": (1,1,0),
-#     "magenta": (1,0,1),
-#     "cyan": (0,1,1)
-# }
+### COLOR FUNCTION/DATA ###
+
+# Checks that a string codes to a valid hex color
+# That is, consists only of the characters "0" thru "f"
+def validHexColor(string):
+    string = string.lower()
+    for char in string:
+        if char not in "0123456789abcdef":
+            return False
+    return True
+
+# Parses a hex color string into an RGB triple (0-255, 0-255, 0-255)
+def parseHexColor(string):
+    if not validHexColor(string):
+        raise ValueError("Not a valid hex string!")
+    N = int(string, 16)
+    B = N % 256
+
+    N = N // 256
+    G = N % 256
+
+    N = N // 256
+    R = N % 256
+
+    return (R,G,B)
+
+# Takes a color string (whether named or hex) and returns
+# the normalized RGB triple (0-1, 0-1, 0-1)
+def colorStr2Tuple(string):
+    string = string.strip().lower()
+    if string in colormap:
+        return colormap[string]
+    else:
+        return eng.rgbNormalize(parseHexColor(string))
+
+# Dict of named colors
+colormap = {
+    "black": (0,0,0),
+    "white": (1,1,1),
+    "red": (1,0,0),
+    "green": eng.rgbNormalize(0x23, 0xb5, 0x83),
+    "blue": (0,0,1),
+    "yellow": (1,1,0),
+    "magenta": (1,0,1),
+    "cyan": (0,1,1),
+    "orange": eng.rgbNormalize(0xff, 0xa5, 0),
+    "violet": eng.rgbNormalize(parseHexColor("800080")),
+    "brown": eng.rgbNormalize(0x80, 0x40, 0)
+}
+
+# List of the colors in proper order.
+# For use in constructing the combobox ONLY!
+# colormap should be used for programming purposes.
+colors = ["red", "green", "blue", "yellow", "cyan", "magenta",
+    "orange", "violet", "brown", "white", "black"]
+
+# Transparently overlays the color A over the color B
+# using transparency alpha (default=0.5)
+def alphaOverlay(A, B, alpha=0.5):
+    if type(A) is list or type(A) is tuple:
+        result = [0,0,0]
+        for i in range(len(A)):
+            result[i] = alphaOverlay(A[i], B[i], alpha)
+        return tuple(result)
+    else:
+        return A*alpha + B*(1-alpha)
+
+# Encapsulates the state of the Morpho GUI.
+class GUIstate(object):
+
+    def __init__(self, **kwargs):
+        for kw in kwargs:
+            setattr(self, kw, kwargs[kw])
+
+    # Load in an MRM file
+    def load(self, filename):
+        # Read in file (if possible)
+        if not os.path.isfile(filename):
+            raise FileNotFoundError
+        with open(filename, "r") as file:
+            sections = file.read().strip().split("\n\n")
+        preamble = sections[0]
+        if preamble != "Morpho animation file":
+            raise FileFormatError("Invalid morpho animation file")
+        try:
+            loadedVersion = float(sections[1])
+        except (IndexError, ValueError):
+            raise FileFormatError("Invalid morpho animation file")
+        if loadedVersion > fileVersion:
+            raise VersionError("This version of Morpho can't load this animation")
+
+        # Third section is the basic animation settings
+        items = sections[2].split("\n")
+        basicSettings = {}
+        for item in items:
+            pair = item.split(" : ")
+            basicSettings[pair[0].strip()] = pair[1].strip()
+
+        # Now go frame by frame
+
+        # "Primitive" since the values are all strings,
+        # not proper data types
+        primitiveFrames = []
+        for n in range(3, len(sections)):
+            items = sections[n].split("\n")
+            settings = {}
+            for item in items:
+                pair = item.split(" : ")
+                settings[pair[0].strip()] = pair[1].strip()
+            primitiveFrames.append(settings)
+
+        # Now build the actual framedata objects
+        frames = []
+        for primFrm in primitiveFrames:
+            if primFrm["type"] == "domain":
+                frm = DomainFrame(**primFrm)
+                frm.id = int(frm.id)
+                frm.hide = (frm.hide == "True")
+                frm.nhorz = int(frm.nhorz)
+                frm.nvert = int(frm.nvert)
+                frm.horzRes = float(frm.horzRes)
+                frm.vertRes = float(frm.vertRes)
+                frm.horzMidlines = (frm.horzMidlines == "True")
+                frm.vertMidlines = (frm.vertMidlines == "True")
+                frm.axes = (frm.axes == "True")
+                frm.BGgrid = (frm.BGgrid == "True")
+                frm.BG = str2floatTuple(frm.BG)
+                frm.tweenDuration = float(frm.tweenDuration)
+                frm.delay = float(frm.delay)
+            else:
+                frm = RangeFrame(**primFrm)
+                frm.id = int(frm.id)
+                frm.hide = (frm.hide == "True")
+                frm.base = int(frm.base)
+                frm.tweenDuration = float(frm.tweenDuration)
+                frm.delay = float(frm.delay)
+            frames.append(frm)
+
+        self.frames = frames
+
+        # # Update the nextID parameter to be greater than all the
+        # # frame ID's currently in the frame list.
+        # self.nextID = 1 + max([frm.id for frm in self.frames])
+
+        # Build the basic animation GUI
+        self.realMin = (fl2str(float(basicSettings["realMin"])))
+        self.realMax = (fl2str(float(basicSettings["realMax"])))
+        self.imagMin = (fl2str(float(basicSettings["imagMin"])))
+        self.imagMax = (fl2str(float(basicSettings["imagMax"])))
+        self.window_width = (basicSettings["window_width"])
+        self.window_height = (basicSettings["window_height"])
+        self.frameRate = (fl2str(float(basicSettings["frameRate"])))
+        self.prerender = (int(basicSettings["prerender"] == "True"))
+        self.tweenMethod = (["direct", "spiral"].index(basicSettings["tweenMethod"]))
+        self.transition = (int(basicSettings["transition"]))
+
+    # Generates the animation described by the GUIstate.
+    def makeAnimation(self):
+        # Check all function formulas against the whitelist
+        if not wh.checkFramelist(self.frames):
+            dialog.showerror(
+                "Invalid functions",
+                "This animation can't be played since some of the function formulas are invalid."
+                )
+            return None
+        # If you made it here, then all the function formulas should be safe.
+
+        # Convert into proper datatypes
+        realMin = float(self.realMin)
+        realMax = float(self.realMax)
+        imagMin = float(self.imagMin)
+        imagMax = float(self.imagMax)
+        window_width = int(self.window_width)
+        window_height = int(self.window_height)
+        frameRate = float(self.frameRate)
+        prerender = bool(self.prerender)
+        tweenMethod = ["direct", "spiral"][self.tweenMethod]
+        transition = self.transition
+
+        # Setup basic animation settings
+        mation = eng.Animation()
+        mation.frameRate = frameRate
+        mation.view = [realMin, realMax, imagMin, imagMax]
+        mation.windowShape = (window_width, window_height)
+        if transition == 1:
+            mation.transition = eng.Animation.linear
+        mation.tweenMethod = tweenMethod
+
+        # Compile all the frames!
+        # First we need the domain frame.
+        # Find it and construct it!
+        for frm in self.frames:
+            if frm.type == "domain": break
+
+        if frm.grid == "Zeta":
+            # Resolution is taken to be the maximum supplied res
+            # amongst horizontal and vertical
+            domFrame = eng.zetaGrid(max(frm.horzRes, frm.vertRes))
+        else:  # Default to Standard grid
+            # Parse color strings into tuples and
+            # compute midline colors
+            # Default to Blue if color not recognized.
+            try: hcolor = colorStr2Tuple(frm.hcolor)
+            except ValueError: hcolor = (0,0,255)
+            try: vcolor = colorStr2Tuple(frm.vcolor)
+            except ValueError: vcolor = (0,0,255)
+            hmidColor = alphaOverlay((1,1,1), hcolor, alpha=0.5)
+            vmidColor = alphaOverlay((1,1,1), vcolor, alpha=0.5)
+            domFrame = eng.standardGrid(
+                view=mation.view,
+                nhorz=frm.nhorz, nvert=frm.nvert,
+                hres=frm.horzRes, vres=frm.vertRes,
+                hcolor=hcolor, vcolor=vcolor,
+                hmidColor=hmidColor, vmidColor=vmidColor,
+                hmidlines=frm.horzMidlines,
+                vmidlines=frm.vertMidlines,
+                BGgrid=frm.BGgrid, axes=frm.axes,
+                delay=frm.delay*frameRate
+                )
+
+        domFrame.id = 0
+        domFrame.optimizePaths()
+
+        # Create polar grid from square, centered domain grid
+        polargrid = lambda s: Re(s)*exp(Im(s)/imagMax*pi/2*i)
+
+        # Now let's create all the other frames!
+        # Construct the (visible) descendents of a parent mframe
+        def constructDescendents(parent, ID):
+            nonlocal polargrid
+
+            # Get child list of framedata structures
+            children = []
+            for frm in self.frames:
+                if frm.type != "domain" and frm.base == ID:
+                    children.append(frm)
+
+            mframes = []
+            for child in children:
+                # Construct evaluation function
+                expr = child.function
+                expr = expr.replace("^", "**")  # Pythonize carets
+
+                func = eval("lambda s, polargrid=polargrid: complex(" + expr + ")")
+
+                # Apply the function to the parent frame
+                try:
+                    mframe = parent.fimage(func)
+                except:
+                    raise Exception("fimage error")
+
+                mframe.delay = round(child.delay*frameRate)
+                mframe.id = child.id
+                mframes.append(mframe)
+                mframes.extend(constructDescendents(mframe, child.id))
+            return mframes
+
+
+        mframes = [domFrame]
+        mframes.extend(constructDescendents(domFrame, ID=0))
+
+        # Isolate visible frames
+        visibleFrames = []
+        for frm in self.frames:
+            if not frm.hide:
+                visibleFrames.append(frm)
+
+        # Arrange the mframes in the order of visibleFrames
+        rearranged = []
+        for frm in visibleFrames:
+            for mfrm in mframes:
+                if mfrm.id == frm.id:
+                    rearranged.append(mfrm)
+        mframes = rearranged
+
+        # Add in the frames for the animation!
+        mation.keyframes = mframes
+
+        # Get timing for each frame tween
+        for n in range(1, len(visibleFrames)):
+            mation.frameCount.append(
+                max(2, round(visibleFrames[n].tweenDuration*frameRate)))
+
+        # Prerender if necessary
+        if prerender:
+            mation.prerender()
+
+        return mation
+
+    # Create and locally run the animation described by the GUIstate.
+    def run(self):
+        mation = self.makeAnimation()
+        if mation == None: return  # Something went wrong. Abort!
+        mation.run()
+
+    # Create and export the animation described by the GUIstate.
+    def export(self, exportFilename):
+        # If exporting, never prerender
+        prerender = self.prerender
+        self.prerender = False
+        mation = self.makeAnimation()
+        self.prerender = prerender
+
+        if exportFilename[-4:].lower() == ".gif":
+            try:
+                mation.export(exportFilename)
+            except PermissionError:  # Temp folder clean up failed.
+                dialog.showerror(
+                    "Clean up Error",
+                    "Morpho couldn't properly read or write to its \"temp\" directory. The resulting GIF (if it was created) may be flawed."
+                    )
+            except eng.FrameSaveError:  # PNG export of mframe failed
+                dialog.showerror(
+                    "Frame Save Error",
+                    "Morpho couldn't save all the frames of the animation."
+                    )
+            except eng.GifError:
+                dialog.showerror(
+                    "GIF Error",
+                    "Morpho couldn't properly assemble all of the frames together into a GIF. The resulting GIF (if it was created) may be flawed."
+                    )
+            except:  # Unknown error
+                dialog.showerror(
+                    "Unknown Error",
+                    "An error occurred when exporting this animation. The resulting GIF (if it was created) may be flawed."
+                    )
+        else:
+            raise FileFormatError("Unknown export file format")
+
 
 # Creates a standard domain framedata object.
 # Optionally, you can specify keyword arguments to modify
@@ -1495,6 +1711,8 @@ class DomainFrame(object):
         self.nvert = 11
         self.horzRes = 1
         self.vertRes = 1
+        self.hcolor = "blue"
+        self.vcolor = "blue"
         self.horzMidlines = True
         self.vertMidlines = True
         self.axes = True
@@ -1565,13 +1783,53 @@ def str2floatTuple(st):
     return tuple(float(item.strip()) \
         for item in st.replace("(", "").replace(")", "").split(","))
 
+# Calls a separate instance of Morpho to play the animation.
+# This will either call the python script "Morpho.py"
+# or call the "Morpho" executable depending on exportMode.
+# Optional arg "exportFilename" tells callPlayer() to export
+# lastplay.mrm as the filename passed in.
+# WARNING: callPlayer() will NOT check the supplied exportFilename
+# to make sure it's sanitary. Do that BEFORE calling callPlayer
+# with an exportFilename argument!
+def callPlayer(exportFilename=""):
+    # exportMode should be set to True at the beginning of this file
+    # if you're about to export Morpho as a standalone.
+    # If you're just trying to run the script, exportMode should
+    # be set to False.
+
+    # Build command step by step
+    cmd = []
+
+    if exportMode:
+        if platform.system() == "Windows":
+            cmd.extend([pwd+"Morpho.exe", pwd+"resources\\lastplay.mrm"])
+        else:
+            cmd.extend([pwd+"Morpho", pwd+"resources"+os.sep+"lastplay.mrm"])
+    else:
+        if platform.system() == "Windows":
+            cmd.extend(["python", pwd+"Morpho.py", pwd+"resources\\lastplay.mrm"])
+        else:
+            cmd.extend(["python3", pwd+"Morpho.py", pwd+"resources"+os.sep+"lastplay.mrm"])
+
+    # Append export filename if provided; else add --play flag.
+    if exportFilename == "":
+        cmd.append("--play")
+    else:
+        cmd.append("--export")
+        cmd.append(exportFilename)
+
+    if platform.system() == "Windows":
+        sp.call(cmd, creationflags=CREATE_NO_WINDOW)
+    else:
+        sp.call(cmd)
+
 # Default special settings for the GUI
 defaultSettings = {
     "showLoadWarning" : True
 }
 
 # Read in special settings from file
-def getSettings(filename="./settings.dat"):
+def getSettings(filename=pwd+"resources"+os.sep+"settings.dat"):
     try:
         with open(filename, "r") as file:
             raw = file.read()
@@ -1590,7 +1848,7 @@ def getSettings(filename="./settings.dat"):
 
 # Save current special settings as a file
 # Returns True/False based on success/failure
-def saveSettings(settings, filename="./settings.dat", showerror=True):
+def saveSettings(settings, filename=pwd+"resources"+os.sep+"settings.dat", showerror=True):
     # Stringify settings
     content = ""
     for key in settings:
@@ -1612,10 +1870,10 @@ def saveSettings(settings, filename="./settings.dat", showerror=True):
 
 # Starts the GUI in the standard way.
 # Also implements some error handling.
-def startGUI():
+def startGUI(load=None):
     # If this is the first-time launch of Morpho, show off
     # the Power Sequence Animation
-    if not os.path.isfile("./settings.dat"):
+    if not os.path.isfile(pwd+"resources"+os.sep+"settings.dat"):
         # Make this file so the next time Morpho is launched,
         # it doesn't show off.
         if not saveSettings(defaultSettings, showerror=False):
@@ -1624,13 +1882,45 @@ def startGUI():
                 "Morpho isn't able to write files in its own directory. This is required in order to play animations."
                 )
             return
-
-        if exportMode:
-            sp.call("player.exe", creationflags=CREATE_NO_WINDOW)
-        else:
-            sp.call("python player.py", creationflags=CREATE_NO_WINDOW)
+        if load == None: # Only show off if no file to load.
+            callPlayer()
 
     rootWin = RootWindow()
+    if load != None:
+        # Check that the specified file exists.
+        if not os.path.isfile(load):
+            dialog.showerror(
+                "Load error",
+                "Morpho couldn't find the file to load."
+                )
+        else:
+            try:
+                # Attempt to read in the file
+                sections = rootWin.readMRM(load)
+                if len(sections) == 0:
+                    dialog.showerror(
+                        "Invalid file.",
+                        "The selected file isn't a valid Morpho Animation file.")
+                else:
+                    rootWin.load(load)
+            except:
+                dialog.showerror(
+                    "Load error",
+                    "For unknown reason, Morpho couldn't load the file."
+                    )
+            # Show load warning upon successful load.
+            if rootWin.settings["showLoadWarning"]:
+                if not dialog.askyesno(
+                    "Load Warning",
+                    "WARNING: You should be careful before playing any animation file obtained from an untrusted source. There is a small risk that an attacker could inject malicious code into an animation file." \
+                    +"\n\n" \
+                    +"However, you do not need to worry about this if you are loading an animation from a trusted source such as your own animations or the preloaded animations." \
+                    +"\n\n" \
+                    +"Do you want to see this warning again in the future?"
+                    ):
+
+                    rootWin.settings["showLoadWarning"] = False
+                    saveSettings(rootWin.settings)
     try:
         rootWin.render()
     except:

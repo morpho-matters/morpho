@@ -1,58 +1,60 @@
 Morpho animation file
 
-1.0
+1.01
 
-imagMax : 5.0
-imagMin : -5.0
 window_width : 600
-realMax : 5.0
-frameRate : 30.0
-prerender : False
-tweenMethod : direct
-window_height : 600
 realMin : -5.0
+tweenMethod : direct
+frameRate : 30.0
+imagMax : 5.0
+realMax : 5.0
 transition : 0
+window_height : 600
+prerender : False
+imagMin : -5.0
 
-vertRes : 1.0
-horzMidlines : True
-vertMidlines : True
-type : domain
-tweenDuration : 3.0
-name : Domain
-id : 0
-grid : Standard
-BGgrid : False
-axes : False
-nhorz : 11
 hide : True
-nvert : 11
 horzRes : 1.0
 delay : 0.0
+vertRes : 1.0
+nvert : 11
+id : 0
+name : Domain
+horzMidlines : True
+BGgrid : False
 BG : (0.0, 0.0, 0.0)
-
+grid : Standard
 tweenDuration : 3.0
-delay : 1.0
-type : range
-name : Disk
+nhorz : 11
+vcolor : magenta
+hcolor : red
+axes : False
+vertMidlines : True
+type : domain
+
 hide : False
+tweenDuration : 3.0
 base : 0
-function : disk(s)
+delay : 1.0
 id : 1
-
-tweenDuration : 3.0
-delay : 2.0
+function : disk(s)
+name : Disk
 type : range
-name : Clover
+
 hide : False
+tweenDuration : 3.0
 base : 1
-function : abs(s)*sin(2*arg(s))*exp(arg(s)*i)
+delay : 2.0
 id : 2
-
-tweenDuration : 3.0
-delay : 2.0
+function : abs(s)*sin(2*arg(s))*exp(arg(s)*i)
+name : Clover
 type : range
-name : Sunflower
+
 hide : False
+tweenDuration : 3.0
 base : 1
-function : abs(s)*sin(4*arg(s))*exp(arg(s)*i)
+delay : 2.0
 id : 3
+function : abs(s)*sin(4*arg(s))*exp(arg(s)*i)
+name : Sunflower
+type : range

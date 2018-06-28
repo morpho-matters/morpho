@@ -1,6 +1,8 @@
 # morpho
 Transformation Animator
 
+Version 1.1.0
+
 -=About=-
 
 At its most basic, Morpho is a program that lets you "graph" complex-valued functions as an animated "transformation" where the points in the input grid "move over" to their corresponding output points. Although this was the original idea, Morpho has grown to handle linear transformations (i.e. matrix multiplication) as well as more exotic animations.
@@ -11,34 +13,42 @@ Morpho was inspired by Grant Sanderson's brilliant Youtube channel 3Blue1Brown, 
 
 -=Requirements=-
 
-Morpho was written in Python 3 and requires three external modules:
+Morpho was written in Python 3 and requires four external modules:
 - pyglet
 - numpy
 - mpmath
+- imageio
 
 You should be able to obtain these with the following pip3 commands:
 
 - pip3 install pyglet
 - pip3 install numpy
 - pip3 install mpmath
+- pip3 install imageio
+
+-=Additional instructions for Mac users=-
+
+Pyinstaller seems to have some difficulty handling the tkinter module in some installations of Python 3. If you run into this problem, you might try using the Homebrew installation of Python 3 which worked for me.
+
+If you're on an older version of Mac, after installing the above modules, you may also need to uninstall and reinstall pillow. Try this if you can't get Morpho to run properly on Mac:
+- pip3 uninstall pillow
+- pip3 install pillow==5.0.0
 
 -=How to Use=-
 
-Once downloaded, running the script launch_morpho.py should start up Morpho in its out-of-the-box state: you should see the introductory animation play, followed by the main window.
+Once downloaded, running the script Morpho.py should start up Morpho in its out-of-the-box state: you should see the introductory animation play, followed by the main window.
 
 -=How to Export as an Executable=-
 
-As it currently stands, the export process is a little messy. This is largely because there actually need to be two independent executables as part of the export, since the animation player is separate from the GUI.
+The export process is a lot simpler than the last time around. What follows are the steps I took using pyinstaller (which can be obtained via the command "pip3 install pyinstaller").
 
-What follows are the steps I took using pyinstaller:
+First, ensure that exportMode is set to True at the top of gui.py. This tells the program to call an external executable when playing animations and not call the script Morpho.py thru Python itself.
 
-First, ensure that exportMode is set to True at the top of gui.py. This tells the program to call an external executable for the animation player and not call player.py.
+Depending on your platform, run the following pyinstaller commands:
 
-Next run the following pyinstaller commands:
+- pyinstaller --windowed Morpho.py (on Windows)
+- pyinstaller Morpho.py (on Mac)
 
-- pyinstaller --windowed launch_morpho.py
-- pyinstaller --windowed player.py
+Two directories will be created called "build" and "dist", the relevant one being "dist" (you can delete "build"). Within "dist" there will be a single directory called "Morpho". Copy and paste the "animations" and "resources" directories into the "Morpho" directory and you're done.
 
-Two directories will be created called "build" and "dist", the relevant one being "dist". Within dist, there will be two directories: one called "launch_morpho" and the other "player". You need to merge these two directories together. I usually just cut and paste the contents of "player" into "launch_morpho" skipping any duplicates; once this is complete, I delete the "player" directory and rename the "launch_morpho" directory to "Morpho", as well as the executable "launch_morpho" to "Morpho".
-
-After this, you need to place an "animations" subdirectory into the Morpho directory which will contain any preloaded animations and provide a place for users to save their own animations. Finally, you need to pick an MRM file to be the introductory animation and place it in the main Morpho directory alongside the executables, but rename it "lastplay.mrm". The name "lastplay.mrm" is crucial, as the animation player looks for this file upon the first startup. I usually pick "power seq.mrm" to be the introductory animation. It can be found in animations/preloaded/complex functions/power seq.mrm
+Note: The "resources" directory will actually contain two different versions of gifsicle: one for Windows and one for Mac. As an optional final step, you can delete whichever one is NOT for your platform: i.e. delete "gifsicle.exe" if exporting on Mac, or delete "gifsicle" if exporting on Windows.

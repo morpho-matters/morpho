@@ -3,10 +3,18 @@ from __future__ import division  # For Python 2
 
 import pyglet as pg
 pyglet = pg
+import morpho.giffer as giffer
 # import time
 import math
 import cmath
+import os, sys, shutil
 # import traceback
+
+# Get location of the Morpho directory.
+pwd = os.sep.join(sys.argv[0].split(os.sep)[:-1])
+if os.sep not in pwd:
+    pwd = os.curdir
+pwd += os.sep
 
 ### CONSTANTS ###
 pi = cmath.pi
@@ -15,6 +23,14 @@ inf = float("inf")
 nan = float("nan")
 # Detect infinite or nan (real or complex)
 isbadnum = lambda x: math.isnan(abs(x)*0)
+
+### SPECIAL EXCEPTIONS ###
+
+class FrameSaveError(Exception):
+    pass
+
+class GifError(Exception):
+    pass
 
 ### CLASSES ###
 
@@ -356,7 +372,7 @@ class Frame(object):
         self.points = points
         self.paths = paths
         self.background = (0,0,0)
-        self.delay = 0  # frames
+        self.delay = 0  # number of frames
         self.optimized = False
 
     # Returns a (deep-ish) copy of the frame
@@ -593,7 +609,6 @@ class Animation(object):
         # tweenMethod denotes what style of animation to use.
         # The default is "spiral" in which points on the complex
         # plane "spiral" over to their destinations during a tween.
-        # Future will have alternate tweenMethods like "direct".
         self.tweenMethod = "spiral"
 
         # Prerendering attributes
@@ -741,9 +756,11 @@ class Animation(object):
         @self.window.event
         def on_close(mation=self):
             # Reset active animation attributes
+            mation.active = False
             mation.window = None
             mation.update = None
-            mation.active = False
+            mation.paused = False
+            mation.currentFrame = 0
             mation.delay = 0
 
         @self.window.event
@@ -753,10 +770,6 @@ class Animation(object):
             else:
                 mation.pause()
 
-        # @self.window.event
-        # def on_mouse_release(x, y, button, modifiers, mation=self):
-        #     mation.resume()
-
         # Reset delay attribute
         self.delay = 0
 
@@ -764,9 +777,117 @@ class Animation(object):
 
         pg.app.run()
         pg.app.exit()
-        pg.clock.unschedule(self.update)
 
-        pg.clock.unschedule(self.update)
+    # Exports the animation as an animated GIF
+    def export(self, filename):
+        if len(self.keyframes) == 0:
+            raise Exception("Can't export animation with no keyframes!")
+        if len(self.frameCount) != len(self.keyframes) - 1:
+            raise Exception("len(frameCount) != len(keyframes)-1")
+
+        if self.window == None: self.setupWindow()
+
+        self.active = True
+        self.window.switch_to()  # Focus on this window for rendering.
+
+        # Describes the delay of each gif frame of animation.
+        # It is equal to 1/frameRate unless there's a keyframe delay.
+        gifDelays = [1.0/self.frameRate]*(1+sum(self.frameCount))
+        def update(dt, mation=self):
+            self.window.set_visible(False)
+            animationEnd = False
+            # Reached end of animation. Render final keyframe.
+            if mation.currentFrame >= sum(mation.frameCount):
+                mation.keyframes[-1].plot(mation.view, mation.window)
+                mation.active = False
+                pg.clock.unschedule(mation.update)
+                animationEnd = True
+                gifDelays[-1] = \
+                    max(1.0/mation.frameRate, mation.keyframes[-1].delay/mation.frameRate)
+            else:
+                # Compute which keyframe and subFrame we need to plot
+                keyID = 0
+                subFrame = mation.currentFrame
+                while subFrame >= mation.frameCount[keyID]:
+                    subFrame -= mation.frameCount[keyID]
+                    keyID += 1
+
+                if subFrame == 0:
+                    frm = mation.keyframes[keyID]
+                    gifDelays[mation.currentFrame] = \
+                        max(1.0/mation.frameRate, mation.keyframes[keyID].delay/mation.frameRate)
+                else:
+                    frm = mation.keyframes[keyID].tween( \
+                        mation.keyframes[keyID+1], \
+                        mation.transition(subFrame/mation.frameCount[keyID]), \
+                        mation.tweenMethod)
+
+                frm.plot(mation.view, mation.window)
+
+            # Save current frame as a numbered PNG image.
+            imgfile = pwd+"resources"+os.sep+"temp"+os.sep + int2fixedstr(mation.currentFrame, \
+                digits=numdigits(1+sum(mation.frameCount))) + ".png"
+            try:
+                pyglet.image.get_buffer_manager().get_color_buffer().save(imgfile)
+            except:
+                raise FrameSaveError
+
+            if animationEnd:
+                pg.app.exit()
+                mation.window.close()
+                resetMation()
+
+                # Make the GIF!
+                try:
+                    giffer.makegif(directory=pwd+"resources"+os.sep+"temp", saveas=filename, duration=gifDelays)
+                    giffer.optimizegif(filename)
+                except:
+                    raise GifError
+
+                # Clean up temp directory now that we're done
+                try:
+                    if os.path.isdir(pwd+"resources"+os.sep+"temp"):
+                        shutil.rmtree(pwd+"resources"+os.sep+"temp")
+                    os.makedirs(pwd+"resources"+os.sep+"temp")
+                except:
+                    raise PermissionError
+            else:
+                mation.currentFrame += 1
+
+        self.update = update
+
+        @self.window.event
+        def on_draw(mation=self):
+            pass
+
+        def resetMation(mation=self):
+            # Reset active animation attributes
+            mation.active = False
+            mation.window = None
+            mation.update = None
+            mation.paused = False
+            mation.currentFrame = 0
+            mation.delay = 0
+
+        @self.window.event
+        def on_close(mation=self):
+            resetMation()
+
+        # Reset delay attribute
+        self.delay = 0
+
+        pg.clock.schedule_interval(self.update, 1e-12)
+
+        # Clear out temp directory initially
+        try:
+            if os.path.isdir(pwd+"resources"+os.sep+"temp"):
+                shutil.rmtree(pwd+"resources"+os.sep+"temp")
+            os.makedirs(pwd+"resources"+os.sep+"temp")
+        except:
+            raise PermissionError
+
+        pg.app.run()
+        pg.app.exit()
 
     def pause(self):
         if not self.active: return
@@ -959,6 +1080,23 @@ def flattenList(a):
             flattened.append(item)
     return flattened
 
+# Converts an int into a string of fixed length given by the
+# parameter digits. Works by prepending zeros if the string
+# is too short.
+def int2fixedstr(n, digits=3):
+    str_n = str(n)
+    return "0"*(digits-len(str_n)) + str_n
+
+# Returns number of digits required to represent the integer
+# in the given base (default=10)
+def numdigits(n, base=10):
+    n = abs(int(n))
+    d = 0
+    while n > 0:
+        n = n // base
+        d += 1
+    return max(1,d)
+
 # Computes the correct amount to shift an angle th1 so that it
 # becomes th2 in the shortest possible path
 # i.e. a path that does not traverse more than pi radians
@@ -1020,7 +1158,7 @@ def standardGrid(
     nhorz=10, nvert=10,
     hres=1, vres=1,
     hcolor=(0,0,1), vcolor=(0,0,1),
-    hmid=(0.5,0.5,1), vmid=(0.5,0.5,1),
+    hmidColor=(0.5,0.5,1), vmidColor=(0.5,0.5,1),
     hwidth=3, vwidth=3,
     hmidlines=True, vmidlines=True,
     BGgrid=True, axes=True,
@@ -1065,7 +1203,7 @@ def standardGrid(
         if hmidlines:
             y = ymin + (n+0.5)*(ymax-ymin)/(nhorz-1)
             Line = line(xmin+y*1j, xmax+y*1j, steps=50*hres)
-            Line.color = hmid
+            Line.color = hmidColor
             Line.width = 1
             frm.paths.insert(0, Line)
 
@@ -1082,7 +1220,7 @@ def standardGrid(
         if vmidlines:
             x = xmin + (n+0.5)*(xmax-xmin)/(nvert-1)
             Line = line(x+ymin*1j, x+ymax*1j, steps=50*vres)
-            Line.color = vmid
+            Line.color = vmidColor
             Line.width = 1
             frm.paths.insert(0, Line)
 

@@ -1,46 +1,51 @@
 Morpho animation file
 
-1.0
+1.01
 
-prerender : False
 transition : 0
-window_height : 600
-realMin : -5.0
 tweenMethod : spiral
 frameRate : 30.0
+imagMax : 5.0
 imagMin : -5.0
 window_width : 600
-imagMax : 5.0
 realMax : 5.0
+realMin : -5.0
+prerender : False
+window_height : 600
 
+horzMidlines : True
 name : Domain
-grid : Standard
-nhorz : 11
 id : 0
-vertMidlines : True
+hide : False
+vertRes : 1.0
+delay : 0.0
+vcolor : blue
 axes : True
 type : domain
 nvert : 11
-horzRes : 1
-BG : (0, 0, 0)
-delay : 0
-horzMidlines : True
-vertRes : 1
-tweenDuration : 3
+vertMidlines : True
+nhorz : 11
+BG : (0.0, 0.0, 0.0)
 BGgrid : True
+tweenDuration : 3.0
+hcolor : green
+horzRes : 1.0
+grid : Standard
 
 name : Square root
 type : range
-id : 1
-base : 0
+hide : False
 function : 2*sqrt(s)
-tweenDuration : 3.0
 delay : 2.0
+tweenDuration : 3.0
+base : 0
+id : 1
 
 name : Domain again
 type : range
-id : 2
-base : 0
+hide : False
 function : s
-tweenDuration : 3.0
 delay : 2.0
+tweenDuration : 3.0
+base : 0
+id : 2
