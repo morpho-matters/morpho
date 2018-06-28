@@ -28,7 +28,6 @@ def runMRM(filename=pwd+"resources"+os.sep+"lastplay.mrm", exportFilename=""):
             state.export(exportFilename)
     except:
         gui.showStandardError()
-        raise
 
 # Parse script parameters
 export = False
