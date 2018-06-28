@@ -33,6 +33,7 @@ def makegif(filenames="*", directory=pwd, saveas=pwd+"movie.gif", \
             duration[i] = min(duration[i], 655)
 
     if filenames == "*": filenames = os.listdir(directory)
+    initializegif(saveas)
     with imageio.get_writer(saveas, mode='I', duration=duration) as writer:
         for filename in filenames:
             image = imageio.imread(directory + os.sep + filename)
@@ -40,8 +41,6 @@ def makegif(filenames="*", directory=pwd, saveas=pwd+"movie.gif", \
 
 # Optimizes a gif file in place using gifsicle.
 # Requires the gifsicle executable to be in the current directory.
-# WARNING: Does NOT check that filename arg is sanitized.
-# Check yourself before using it!
 def optimizegif(filename):
     if not os.path.isfile(filename):
         raise FileNotFoundError
@@ -51,3 +50,15 @@ def optimizegif(filename):
     else:
         cmd = [pwd+"resources"+os.sep+"gifsicle", "-b", "-O3", "--careful", filename]
         sp.call(cmd)
+
+# Attempts to initialize an empty GIF file.
+# If file already exists, does nothing.
+# Although this is not technically necessary for GIF creation,
+# it allows a way to test a filepath's validity.
+def initializegif(filename):
+    # if filename exists, then nothing needs to be done.
+    if os.path.isfile(filename):
+        return
+    # Try to make the file.
+    with open(filename, "a") as file:
+        pass
