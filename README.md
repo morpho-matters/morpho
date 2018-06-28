@@ -50,3 +50,5 @@ Depending on your platform, run the following pyinstaller commands:
 - pyinstaller Morpho.py (on Mac)
 
 Two directories will be created called "build" and "dist", the relevant one being "dist" (you can delete "build"). Within "dist" there will be a single directory called "Morpho". Copy and paste the "animations" and "resources" directories into the "dist" directory and you're done.
+
+Note: The "resources" directory will actually contain two different versions of gifsicle: one for Windows and one for Mac. As an optional final step, you can delete whichever one is NOT for your platform: i.e. delete "gifsicle.exe" if exporting on Mac, or delete "gifsicle" if exporting on Windows.
