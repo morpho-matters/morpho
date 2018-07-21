@@ -26,7 +26,7 @@ import morpho.engine as eng
 import morpho.whitelist as wh
 
 # Current Morpho version
-version = 1.1
+version = 1.11
 
 # fileVersion should only be changed when animations saved with
 # an updated version of Morpho can't be played by older versions.
@@ -1656,10 +1656,10 @@ class GUIstate(object):
         return mation
 
     # Create and locally run the animation described by the GUIstate.
-    def run(self):
+    def run(self, autoclose=False):
         mation = self.makeAnimation()
         if mation == None: return  # Something went wrong. Abort!
-        mation.run()
+        mation.run(autoclose=autoclose)
 
     # Create and export the animation described by the GUIstate.
     def export(self, exportFilename):
@@ -1791,7 +1791,7 @@ def str2floatTuple(st):
 # WARNING: callPlayer() will NOT check the supplied exportFilename
 # to make sure it's sanitary. Do that BEFORE calling callPlayer
 # with an exportFilename argument!
-def callPlayer(exportFilename=""):
+def callPlayer(exportFilename="", autoclose=False):
     # exportMode should be set to True at the beginning of this file
     # if you're about to export Morpho as a standalone.
     # If you're just trying to run the script, exportMode should
@@ -1817,6 +1817,10 @@ def callPlayer(exportFilename=""):
     else:
         cmd.append("--export")
         cmd.append(exportFilename)
+
+    # Append "--autoclose" flag if autoclose = True
+    if autoclose:
+        cmd.append("--autoclose")
 
     if platform.system() == "Windows":
         sp.call(cmd, creationflags=CREATE_NO_WINDOW)
@@ -1883,7 +1887,7 @@ def startGUI(load=None):
                 )
             return
         if load == None: # Only show off if no file to load.
-            callPlayer()
+            callPlayer(autoclose=True)
 
     rootWin = RootWindow()
     if load != None:
