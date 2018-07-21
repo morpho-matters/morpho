@@ -662,7 +662,7 @@ class Animation(object):
 
 
     # Runs the animation
-    def run(self, window=None):
+    def run(self, window=None, autoclose=False):
         if len(self.keyframes) == 0:
             raise Exception("Can't run animation with no keyframes!")
         if len(self.frameCount) != len(self.keyframes) - 1:
@@ -715,14 +715,19 @@ class Animation(object):
                 if mation.currentFrame >= len(mation.frames):
                     mation.currentFrame = 0
                     mation.active = False
-                    # mation.frames = []  # TEMP!!!
                     pg.clock.unschedule(mation.update)
+                    if autoclose:
+                        pg.app.exit()
+                        mation.window.close()
 
             elif mation.currentFrame >= sum(mation.frameCount):
                 mation.currentFrame = 0
                 mation.keyframes[-1].plot(mation.view, mation.window)
                 mation.active = False
                 pg.clock.unschedule(mation.update)
+                if autoclose:
+                    pg.app.exit()
+                    mation.window.close()
 
             else:
                 if mation.delay < 0: mation.currentFrame -= 1
