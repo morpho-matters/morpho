@@ -765,7 +765,14 @@ class Animation(object):
 
         @self.window.event
         def on_mouse_press(x, y, button, modifiers, mation=self):
-            if mation.paused:
+            # Replay animation if clicked after animation finishes
+            if not mation.active:
+                mation.active = True
+                mation.paused = False
+                mation.delay = 0
+                mation.currentFrame = 0
+                pg.clock.schedule_interval(self.update, 1.0/self.frameRate)
+            elif mation.paused:
                 mation.resume()
             else:
                 mation.pause()
