@@ -4,7 +4,7 @@ import os, sys
 
 pwd = gui.pwd
 
-def runMRM(filename=pwd+"resources"+os.sep+"lastplay.mrm", exportFilename=""):
+def runMRM(filename=pwd+"resources"+os.sep+"lastplay.mrm", exportFilename="", autoclose=False):
     try:
         state = gui.GUIstate()
         try:
@@ -23,7 +23,7 @@ def runMRM(filename=pwd+"resources"+os.sep+"lastplay.mrm", exportFilename=""):
             return
 
         if exportFilename == "":
-            state.run()
+            state.run(autoclose=autoclose)
         else:
             state.export(exportFilename)
     except:
@@ -36,33 +36,27 @@ argv = sys.argv[:]
 while "--export" in argv:
     argv.remove("--export")
     export = True
+
 while "--play" in argv:
     argv.remove("--play")
     play = True
 
+autoclose = False
+while "--autoclose" in argv:
+    argv.remove("--autoclose")
+    autoclose = True
 
 if export:
     if len(argv) != 3:
         raise Exception("--export flag requires exactly two file paths!")
-    runMRM(argv[1], argv[2])
+    runMRM(argv[1], argv[2], autoclose=autoclose)
 if play:
     if len(argv) < 2:
         raise Exception("No MRM supplied to play!")
-    runMRM(argv[1])
+    runMRM(argv[1], autoclose=autoclose)
 if not(export) and not(play):
     # If just one parameter, just start up the Morpho GUI normally
     if len(argv) == 1:
         gui.startGUI()
     else:
         gui.startGUI(argv[1])
-
-# if len(argv) == 2:
-#     # If load parameter passed, then load MRM, else play MRM
-#     if load:
-#         pass
-#     else:
-#         runMRM(argv[1])
-# elif len(argv) == 3: # Two filenames means export MRM to GIF
-#     runMRM(argv[1], argv[2])
-# else:  # Normal startup
-#     gui.startGUI()
