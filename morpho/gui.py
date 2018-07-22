@@ -45,9 +45,11 @@ CREATE_NO_WINDOW = 0x08000000
 # Location of the Morpho directory.
 pwd = eng.pwd
 
-# Set exportMode to True if you're going to export Morpho
-# as a standalone using pyinstaller.
-exportMode = False
+# Detect whether Morpho.py or an exported executable is being called
+if sys.argv[0].lower() == "morpho.py":
+    exportMode = False
+else:
+    exportMode = True
 
 # Set this to True if you're debugging the player so that
 # errors get written to the console.
