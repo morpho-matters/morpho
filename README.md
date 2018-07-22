@@ -42,8 +42,6 @@ Once downloaded, running the script Morpho.py should start up Morpho in its out-
 
 The export process is a lot simpler than the last time around. What follows are the steps I took using pyinstaller (which can be obtained via the command "pip3 install pyinstaller").
 
-First, ensure that exportMode is set to True at the top of gui.py. This tells the program to call an external executable when playing animations and not call the script Morpho.py thru Python itself.
-
 Depending on your platform, run the following pyinstaller commands:
 
 - pyinstaller --windowed Morpho.py (on Windows)
