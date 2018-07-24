@@ -5,7 +5,7 @@ Version 1.1.1
 
 -=About=-
 
-At its most basic, Morpho is a program that lets you "graph" complex-valued functions as an animated "transformation" where the points in the input grid "move over" to their corresponding output points. Although this was the original idea, Morpho has grown to handle linear transformations (i.e. matrix multiplication) as well as more exotic animations.
+At its most basic, Morpho is a program that lets you "graph" complex-valued functions as an animated transformation where the points in the input grid move over to their corresponding output points. Although this was the original idea, Morpho has grown to handle linear transformations (i.e. matrix multiplication) as well as more exotic animations.
 
 At this point, I mainly regard Morpho as an educational tool to help visualize otherwise hard to visualize math functions, but I like to think it has wider applications and could be of some use to professionals who may need a quick way to visualize a complicated transformation in the plane.
 
