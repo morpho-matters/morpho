@@ -3,6 +3,14 @@ Transformation Animator
 
 Version 1.1.1
 
+![Riemann Zeta function](https://github.com/morpho-matters/morpho/blob/image-branch/gifs/zeta.gif)
+
+![Gamma function](https://github.com/morpho-matters/morpho/blob/image-branch/gifs/gamma.gif)
+![Diagonalization](https://github.com/morpho-matters/morpho/blob/image-branch/gifs/diagonalization.gif)
+
+![Squaring function](https://github.com/morpho-matters/morpho/blob/image-branch/gifs/square.gif)
+![Twist](https://github.com/morpho-matters/morpho/blob/image-branch/gifs/twist.gif)
+
 -=About=-
 
 At its most basic, Morpho is a program that lets you "graph" complex-valued functions as an animated transformation where the points in the input grid move over to their corresponding output points. Although this was the original idea, Morpho has grown to handle linear transformations (i.e. matrix multiplication) as well as more exotic animations.
