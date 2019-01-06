@@ -368,7 +368,9 @@ class Path(object):
 
 # A single (key)frame of animation
 class Frame(object):
-    def __init__(self, points=[], paths=[]):
+    def __init__(self, points=None, paths=None):
+        if points is None: points = []
+        if paths is None: paths = []
         self.points = points
         self.paths = paths
         self.background = (0,0,0)
@@ -584,7 +586,8 @@ class FastFrame(object):
 # A sequence of keyframes, tweened.
 class Animation(object):
 
-    def __init__(self, keyframes=[]):
+    def __init__(self, keyframes=None):
+        if keyframes is None: keyframes = []
         self.keyframes = keyframes
 
         # frameCount is how many frames to use to tween a keyframe
@@ -668,14 +671,14 @@ class Animation(object):
         if len(self.frameCount) != len(self.keyframes) - 1:
             raise Exception("len(frameCount) != len(keyframes)-1")
         # Handle unspecified window parameter
-        if window == None:
+        if window is None:
             # If animation is just paused, treat run() like resume()
             if self.paused:
                 self.resume()
                 return
 
             # If the animation has no associated window, set up one.
-            if self.window == None: self.setupWindow()
+            if self.window is None: self.setupWindow()
         else:
             # Throw error if the animation is already associated to an
             # open window, and the user is trying to run it in a different
@@ -797,7 +800,7 @@ class Animation(object):
         if len(self.frameCount) != len(self.keyframes) - 1:
             raise Exception("len(frameCount) != len(keyframes)-1")
 
-        if self.window == None: self.setupWindow()
+        if self.window is None: self.setupWindow()
 
         self.active = True
         self.window.switch_to()  # Focus on this window for rendering.
@@ -914,7 +917,7 @@ class Animation(object):
     # Prerenders and optimizes the animation and stores
     # all the frames in self.frames
     def prerender(self):
-        if self.window == None:
+        if self.window is None:
             self.setupWindow()
         mation = self
 
@@ -1057,7 +1060,7 @@ def createWindow(width=800, height=800):
 def rgbNormalize(R, G=None, B=None, upperbound=255):
     # If one of the components is missing,
     # assume user supplied RGB as a tuple in the first input.
-    if G == None or B == None:
+    if G is None or B is None:
         R,G,B = R
     return (R/upperbound, G/upperbound, B/upperbound)
 
