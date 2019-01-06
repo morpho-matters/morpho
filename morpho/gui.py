@@ -75,7 +75,7 @@ class RootWindow(object):
     def __init__(self, settings=None):
         self.root = tk.Tk()
         self.domain = DomainFrame()
-        if settings == None:
+        if settings is None:
             self.settings = getSettings()
         else:
             self.settings = settings
@@ -380,7 +380,7 @@ class RootWindow(object):
     # Move highlighted frame to the top
     def top(self):
         frm = self.getSelection()
-        if frm == None: return
+        if frm is None: return
 
         self.frames.remove(frm)
         self.frames.insert(0, frm)
@@ -393,7 +393,7 @@ class RootWindow(object):
     # Move highlighted frame up one
     def up(self):
         frm = self.getSelection()
-        if frm == None: return
+        if frm is None: return
 
         # Get index of selected frame. Do nothing if at top.
         i = self.frames.index(frm)
@@ -409,7 +409,7 @@ class RootWindow(object):
     # Move highlighted frame down one
     def down(self):
         frm = self.getSelection()
-        if frm == None: return
+        if frm is None: return
 
         i = self.frames.index(frm)
         if i == len(self.frames) - 1: return
@@ -425,7 +425,7 @@ class RootWindow(object):
     # Move highlighted frame to the bottom
     def bot(self):
         frm = self.getSelection()
-        if frm == None: return
+        if frm is None: return
 
         self.frames.remove(frm)
         self.frames.append(frm)
@@ -444,7 +444,7 @@ class RootWindow(object):
         frm = self.getSelection()
 
         # If no selection, do nothing.
-        if frm == None: return
+        if frm is None: return
 
         # Based on frame type, determine which dialog to open
         if frm.type == "domain":
@@ -459,13 +459,13 @@ class RootWindow(object):
         frm = self.getSelection()
 
         # If no selection, do nothing.
-        if frm == None: return
+        if frm is None: return
 
         ApplyWindow(self, frm, newFrame=True)
 
     def delete(self):
         frame = self.getSelection()
-        if frame == None: return
+        if frame is None: return
 
         if frame.type == "domain":
             dialog.showerror(
@@ -1660,7 +1660,7 @@ class GUIstate(object):
     # Create and locally run the animation described by the GUIstate.
     def run(self, autoclose=False):
         mation = self.makeAnimation()
-        if mation == None: return  # Something went wrong. Abort!
+        if mation is None: return  # Something went wrong. Abort!
         mation.run(autoclose=autoclose)
 
     # Create and export the animation described by the GUIstate.
@@ -1888,7 +1888,7 @@ def startGUI(load=None):
                 "Morpho isn't able to write files in its own directory. This is required in order to play animations."
                 )
             return
-        if load == None: # Only show off if no file to load.
+        if load is None: # Only show off if no file to load.
             callPlayer(autoclose=True)
 
     rootWin = RootWindow()
