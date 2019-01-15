@@ -180,7 +180,8 @@ class Point(object):
 # Consists of a sequence of complex numbers, an interpolation method,
 # and path thickness (width)
 class Path(object):
-    def __init__(self, seq=[0,1]):
+    def __init__(self, seq=None):
+        if seq is None: seq = [0,1]
         self.seq = seq
         self.interp = "linear"  # This is the only interp method for now.
         self.color = (0,0,0)
