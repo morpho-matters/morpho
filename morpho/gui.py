@@ -586,8 +586,8 @@ class RootWindow(object):
         '''
         This is a hack to get around a bug where successive
         plays of an animation would progressively have
-        laggier framerates. This was probably due to
-        memory clean up not happening properly.
+        laggier framerates. This may have been due to
+        using mutable objects as default arguments in the past.
         To get around this, Morpho saves the current
         animation state in a file locally in its own
         directory and then calls a separate instance
